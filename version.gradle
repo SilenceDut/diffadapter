@@ -1,0 +1,12 @@
+//lib version
+buildscript {
+    ext {
+        //android
+        _compileSdkVersion = 27
+        _targetSdkVersion = 27
+        _supportVersion = '27.1.1'
+        _minSdkVersion = 15
+        _versionCode = System.getenv("BUILD_NUMBER") as Integer ?: 1
+
+    }
+}
