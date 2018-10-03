@@ -1,36 +1,15 @@
 package com.silencedut.diffadapter;
 
-import com.duowan.makefriends.annotation.Attribute;
-import com.duowan.makefriends.annotation.DontProguard;
-import com.duowan.makefriends.annotation.Extend;
-import com.duowan.makefriends.framework.adapter.IProvideItemId;
-
 /**
- *
  * @author SilenceDut
- * @date 16/10/19
+ * @date 2018/9/30
+ * 继承BaseImmutableData的数据在显示期间内容不会发生变化，每次显示的都是从网络或者数据库直接解析创建的新的对象
  */
+public abstract class BaseImmutableData<T extends BaseImmutableData>  implements BaseMutableData<T> {
 
 
-public interface BaseImmutableData<T extends BaseImmutableData> extends IProvideItemId {
-
-    /**
-     * 在业务逻辑上判断是不是同一个Item，比如uid，或者消息Id等
-     * @param newData 新数据
-     * @return 是否是同一个Item
-     */
-    boolean areSameItem(T newData);
-
-    /**
-     * 判断新旧数据对UI是否影响
-     * @param newData 新数据
-     * @return 是否需要跟新UI
-     */
-    boolean areUISame(T newData);
-
-    /**
-     * 创建一个新对象，拷贝当前的数据，用于DiffUtil的拷贝
-     * @return 新的对象
-     */
-    T copyData();
+    @Override
+    public T copyData() {
+        return (T) this;
+    }
 }

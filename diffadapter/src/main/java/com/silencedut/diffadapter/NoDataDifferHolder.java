@@ -3,7 +3,7 @@ package com.silencedut.diffadapter;
 import android.view.View;
 
 /**
- * Created by SilenceDut on 16/10/19.
+ * Created by liushuai on  2018/9/6
  */
 
 public class NoDataDifferHolder extends BaseDiffViewHolder {
@@ -12,7 +12,7 @@ public class NoDataDifferHolder extends BaseDiffViewHolder {
     }
 
     @Override
-    public void updateItem(BaseImmutableData data, int position) {
+    public void updateItem(BaseMutableData data, int position) {
 
     }
 
