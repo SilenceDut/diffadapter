@@ -1,4 +1,6 @@
 apply plugin: 'com.android.library'
+apply plugin: 'com.github.dcendents.android-maven'
+group='com.github.silencedut'
 
 android {
     compileSdkVersion _compileSdkVersion
@@ -20,6 +22,20 @@ android {
         }
     }
 
+    // 指定编码
+    tasks.withType(JavaCompile) {
+        options.encoding = "UTF-8"
+    }
+
+    // 打包源码
+    task sourcesJar(type: Jar) {
+        from android.sourceSets.main.java.srcDirs
+        classifier = 'sources'
+    }
+
+    artifacts {
+        archives sourcesJar
+    }
 }
 
 dependencies {
