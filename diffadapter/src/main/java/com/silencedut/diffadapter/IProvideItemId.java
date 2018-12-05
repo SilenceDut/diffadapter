@@ -1,8 +1,10 @@
 package com.silencedut.diffadapter;
 
 /**
- * Created by liushuai on 2018/1/3 .
- */
+ *
+ * @author SilenceDut
+ * @date 2018/9/6
+ **/
 
 public interface IProvideItemId {
     int getItemViewId();

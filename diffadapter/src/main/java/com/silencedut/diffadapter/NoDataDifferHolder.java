@@ -3,7 +3,8 @@ package com.silencedut.diffadapter;
 import android.view.View;
 
 /**
- * Created by liushuai on  2018/9/6
+ * @author SilenceDut
+ * @date 2018/9/6
  */
 
 public class NoDataDifferHolder extends BaseDiffViewHolder {

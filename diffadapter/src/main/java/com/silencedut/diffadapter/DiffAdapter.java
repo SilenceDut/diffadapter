@@ -22,6 +22,12 @@ import java.util.List;
  *
  * @author SilenceDut
  * @date 2018/9/6
+ *
+ * When the async code is done, you should update the data, not the views. After updating the data, tell the adapter that the data changed. The RecyclerView gets note of this and re-renders your view.
+ * When working with recycling views (ListView or RecyclerView), you cannot know what item a view is representing. In your case, that view gets recycled before the async work is done and is assigned to a different item of your data.
+ * So never modify the view. Always modify the data and notify the adapter. bindView should be the place where you treat these cases.
+ *
+ * 异步数据结果回来不应该直接改变view的状态，而是应该改变数据，让数据驱动view改变
  */
 public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
 
@@ -31,7 +37,7 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
     protected Context mContext;
     protected LayoutInflater mInflater;
     protected DiffAdapter.HolderClickListener mHolderClickListener;
-    protected Fragment supportFragment;
+    protected Fragment attachedFragment;
     private AsyncListDiffer<BaseMutableData> mDifferHelper;
 
 
@@ -46,11 +52,11 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
         this.mContext = context;
         this.mInflater = LayoutInflater.from(context);
 
-        mDifferHelper = new AsyncListDiffer<>(this, new DiffUtil.ItemCallback<BaseMutableData>() {
+        mDifferHelper = new AsyncListDiffer(this, new DiffUtil.ItemCallback<BaseMutableData>() {
             @Override
             public boolean areItemsTheSame(BaseMutableData oldItem, BaseMutableData newItem) {
+                return oldItem.getItemViewId() == newItem.getItemViewId() && oldItem.areSameItem(newItem);
 
-                return oldItem.areSameItem(newItem);
             }
 
             @Override
@@ -69,9 +75,9 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
         });
     }
 
-    public DiffAdapter(Fragment supportFragment) {
-        this(supportFragment.getContext());
-        this.supportFragment = supportFragment;
+    public DiffAdapter(Fragment attachedFragment) {
+        this(attachedFragment.getContext());
+        this.attachedFragment = attachedFragment;
     }
 
     public void registerHolder(Class<? extends BaseDiffViewHolder> viewHolder, int itemViewType) {
@@ -126,28 +132,27 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
         if (datas == null) {
             return;
         }
-        for(BaseMutableData data : datas) {
-            mData.add(data.copyData());
-        }
+
+        mData.addAll(datas);
         doNotifyUI();
     }
 
 
-    public void updateData(BaseMutableData oldData) {
-        if (oldData == null ) {
+    public void updateData(BaseMutableData changedData) {
+        if (changedData == null ) {
             return;
         }
         Iterator<BaseMutableData> iterator = mData.iterator();
         int index = -1;
         while (iterator.hasNext()) {
             index ++;
-            if(oldData.areSameItem(iterator.next())) {
+            if(changedData.areSameItem(iterator.next())) {
                 iterator.remove();
                 break;
             }
         }
-        if(index< mData.size()) {
-            mData.add(index,oldData.copyData());
+        if(index < mData.size()) {
+            mData.add(index,changedData.copyData());
         }
         doNotifyUI();
     }
@@ -169,6 +174,7 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
     private void doNotifyUI() {
         List<BaseMutableData> newList = new ArrayList<>(mData);
         mDifferHelper.submitList(newList);
+
     }
 
     @NonNull
@@ -190,7 +196,7 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
     }
 
 
-    public <T extends BaseMutableData> List<T> getData (Class<T> tClass) {
+    public <T extends BaseMutableData> List<T> getData(Class<T> tClass) {
         List<T> typeLists = new ArrayList<>();
         for(BaseMutableData baseImmutableData : mData) {
             if(tClass.isInstance(baseImmutableData)) {
