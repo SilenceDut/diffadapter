@@ -1,4 +1,4 @@
-package com.silencedut.diffadapter;
+package com.silencedut.diffadapter.utils;
 
 import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProviders;

@@ -1,6 +1,9 @@
-package com.silencedut.diffadapter;
+package com.silencedut.diffadapter.holder;
 
 import android.view.View;
+
+import com.silencedut.diffadapter.DiffAdapter;
+import com.silencedut.diffadapter.data.BaseMutableData;
 
 /**
  * @author SilenceDut

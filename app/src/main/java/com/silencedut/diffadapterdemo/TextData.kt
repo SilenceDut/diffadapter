@@ -1,12 +1,17 @@
 package com.silencedut.diffadapterdemo
 
-import com.silencedut.diffadapter.BaseImmutableData
+import android.graphics.Color
+import com.silencedut.diffadapter.data.BaseImmutableData
 
 /**
  * @author SilenceDut
  * @date 2018/12/5
  */
-class TextData(var id:Int,var content:String) : BaseImmutableData<TextData>() {
+class TextData(var uid:Long,var content:String,var backgroundColor:Int = Color.TRANSPARENT) : BaseImmutableData<TextData>() {
+
+    override fun uniqueFeature(): Any {
+        return this.uid
+    }
 
     companion object {
         const val VIEW_ID = R.layout.holder_text
@@ -17,12 +22,9 @@ class TextData(var id:Int,var content:String) : BaseImmutableData<TextData>() {
         return VIEW_ID
     }
 
-    override fun areSameItem(newData: TextData?): Boolean {
-        return this.id == newData?.id
-    }
 
-    override fun areUISame(newData: TextData?): Boolean {
-        return this.content === newData?.content
+    override fun areUISame(newData: TextData): Boolean {
+        return this.content == newData.content && this.backgroundColor == newData.backgroundColor
 
     }
 

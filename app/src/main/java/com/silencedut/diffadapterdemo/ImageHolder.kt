@@ -3,8 +3,8 @@ package com.silencedut.diffadapterdemo
 import android.util.Log
 import android.view.View
 import android.widget.ImageView
-import com.silencedut.diffadapter.BaseDiffViewHolder
 import com.silencedut.diffadapter.DiffAdapter
+import com.silencedut.diffadapter.holder.BaseDiffViewHolder
 
 /**
  * @author SilenceDut
@@ -26,7 +26,8 @@ class ImageHolder( itemView: View, recyclerAdapter: DiffAdapter): BaseDiffViewHo
     }
 
     override fun updateItem(data: ImageData, position: Int) {
-        Log.d(TAG,"updateItem")
+        Log.d(TAG,"updateItem : "+context.resources.getResourceName(data.sourceId))
+
 
         imageView?.setImageResource(data.sourceId)
     }

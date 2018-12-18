@@ -1,4 +1,4 @@
-package com.silencedut.diffadapter;
+package com.silencedut.diffadapter.holder;
 
 import android.arch.lifecycle.ViewModel;
 import android.content.Context;
@@ -9,6 +9,11 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 
+import com.silencedut.diffadapter.DiffAdapter;
+import com.silencedut.diffadapter.IProvideItemId;
+import com.silencedut.diffadapter.data.BaseMutableData;
+import com.silencedut.diffadapter.utils.ModelProvider;
+
 /**
  *
  * @author SilenceDut
@@ -16,7 +21,7 @@ import android.view.View;
  *
  * implement BaseViewInit interface is convenient to generate views on ViewHolder
  *
- * ViewHolder的子类不要用Notification 接收通知，用LiveData
+ * 建议逻辑写到对应的ViewModel来处理
  */
 
 public abstract class BaseDiffViewHolder<T extends BaseMutableData> extends RecyclerView.ViewHolder implements IProvideItemId {
@@ -42,7 +47,7 @@ public abstract class BaseDiffViewHolder<T extends BaseMutableData> extends Recy
     public BaseDiffViewHolder(View itemView, DiffAdapter baseRecyclerAdapter) {
         super(itemView);
         mBaseAdapter = baseRecyclerAdapter;
-        setUIContext(itemView.getContext());
+        setUIContext(mBaseAdapter.mContext);
     }
 
 
@@ -60,7 +65,7 @@ public abstract class BaseDiffViewHolder<T extends BaseMutableData> extends Recy
      */
     public <V extends ViewModel> V getViewModel(Class<V> modelType){
         if(mBaseAdapter.attachedFragment == null || mBaseAdapter.attachedFragment.isDetached()) {
-            return  ModelProvider.getModel(itemView.getContext(),modelType);
+            return  ModelProvider.getModel(mContext,modelType);
         }
         return ModelProvider.getModel(getAttachedFragment(),modelType);
     }

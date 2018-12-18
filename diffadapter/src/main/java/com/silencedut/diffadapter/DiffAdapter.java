@@ -1,8 +1,14 @@
 package com.silencedut.diffadapter;
 
+import android.arch.lifecycle.LifecycleOwner;
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.MediatorLiveData;
+import android.arch.lifecycle.Observer;
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.recyclerview.extensions.AsyncListDiffer;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.RecyclerView;
@@ -12,7 +18,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.silencedut.diffadapter.data.BaseDiffPayloadData;
+import com.silencedut.diffadapter.data.BaseMutableData;
+import com.silencedut.diffadapter.holder.BaseDiffViewHolder;
+import com.silencedut.diffadapter.holder.NoDataDifferHolder;
+import com.silencedut.diffadapter.utils.UpdateFunction;
+
 import java.lang.reflect.Constructor;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -34,12 +48,14 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
     private static final String TAG = "DiffAdapter";
     private SparseArray<Class<? extends BaseDiffViewHolder>> typeHolders = new SparseArray();
     private List<BaseMutableData> mData = new ArrayList<>();
-    protected Context mContext;
-    protected LayoutInflater mInflater;
-    protected DiffAdapter.HolderClickListener mHolderClickListener;
-    protected Fragment attachedFragment;
-    private AsyncListDiffer<BaseMutableData> mDifferHelper;
 
+    private LayoutInflater mInflater;
+    private LifecycleOwner mLifecycleOwner;
+    private AsyncListDiffer<BaseMutableData> mDifferHelper;
+    private MediatorLiveData mUpdateMediatorLiveData = new MediatorLiveData<BaseMutableData>();
+    public DiffAdapter.HolderClickListener mHolderClickListener;
+    public Fragment attachedFragment;
+    public Context mContext;
 
     /**
      * 一般情况下没处理getChangePayload，默认在{@link #onBindViewHolder(BaseDiffViewHolder holder, int position)()}.更新数据
@@ -48,26 +64,32 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
      *
      */
     @SuppressWarnings("unchecked")
-    public DiffAdapter(Context context) {
-        this.mContext = context;
-        this.mInflater = LayoutInflater.from(context);
-
+    public DiffAdapter(FragmentActivity appCompatActivity) {
+        this.mContext = appCompatActivity;
+        this.mInflater = LayoutInflater.from(appCompatActivity);
+        this.mLifecycleOwner = appCompatActivity;
+        this.mUpdateMediatorLiveData.observe(mLifecycleOwner, new Observer<BaseMutableData>() {
+            @Override
+            public void onChanged(@Nullable BaseMutableData newData) {
+                updateData(newData);
+            }
+        });
         mDifferHelper = new AsyncListDiffer(this, new DiffUtil.ItemCallback<BaseMutableData>() {
             @Override
-            public boolean areItemsTheSame(BaseMutableData oldItem, BaseMutableData newItem) {
-                return oldItem.getItemViewId() == newItem.getItemViewId() && oldItem.areSameItem(newItem);
+            public boolean areItemsTheSame(@NonNull BaseMutableData oldItem, @NonNull BaseMutableData newItem) {
+                return oldItem.getItemViewId() == newItem.getItemViewId() && oldItem.uniqueFeature().equals(newItem.uniqueFeature());
 
             }
 
             @Override
-            public boolean areContentsTheSame(BaseMutableData oldItem, BaseMutableData newItem) {
+            public boolean areContentsTheSame(@NonNull BaseMutableData oldItem, @NonNull BaseMutableData newItem) {
 
                 return oldItem.areUISame(newItem);
             }
 
             @Override
-            public Object getChangePayload(BaseMutableData oldItem, BaseMutableData newItem) {
-                if(oldItem instanceof BaseDiffPayloadData) {
+            public Object getChangePayload(@NonNull BaseMutableData oldItem, @NonNull BaseMutableData newItem) {
+                if (oldItem instanceof BaseDiffPayloadData) {
                     return ((BaseDiffPayloadData) oldItem).getPayload(newItem);
                 }
                 return super.getChangePayload(oldItem, newItem);
@@ -76,8 +98,9 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
     }
 
     public DiffAdapter(Fragment attachedFragment) {
-        this(attachedFragment.getContext());
+        this(attachedFragment.getActivity());
         this.attachedFragment = attachedFragment;
+        this.mLifecycleOwner = attachedFragment;
     }
 
     public void registerHolder(Class<? extends BaseDiffViewHolder> viewHolder, int itemViewType) {
@@ -132,29 +155,57 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
         if (datas == null) {
             return;
         }
-
         mData.addAll(datas);
         doNotifyUI();
     }
 
+    public <T> void  addUpdateMediator(LiveData<T> elementData, final UpdateFunction updateFunction) {
+        mUpdateMediatorLiveData.addSource(elementData, new Observer<T>() {
+            @Override
+            public void onChanged(@Nullable T dataSource) {
 
-    public void updateData(BaseMutableData changedData) {
-        if (changedData == null ) {
-            return;
+                BaseMutableData oldData = getUniqueData(updateFunction.providerUniqueFeature(dataSource));
+
+                ParameterizedType parameterizedType = (ParameterizedType) updateFunction.getClass().getGenericInterfaces()[0];
+                Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+
+                if(oldData != null &&  actualTypeArguments.length > 1 && actualTypeArguments[1] == oldData.getClass()) {
+                    mUpdateMediatorLiveData.setValue(updateFunction.apply(dataSource,oldData.copyData()));
+                }
+            }
+        });
+    }
+
+
+    /**
+     * newData must a new created object
+     * @return isFound and Update
+     */
+    public boolean updateData(BaseMutableData newData) {
+        if (newData == null ) {
+            return false;
         }
+
         Iterator<BaseMutableData> iterator = mData.iterator();
-        int index = -1;
+        int foundIndex = -1;
+        boolean found = false;
         while (iterator.hasNext()) {
-            index ++;
-            if(changedData.areSameItem(iterator.next())) {
+            BaseMutableData data = iterator.next();
+            foundIndex ++;
+            if(data.getItemViewId() == newData.getItemViewId() && newData.uniqueFeature().equals(data.uniqueFeature())) {
                 iterator.remove();
+                found = true;
                 break;
             }
+
         }
-        if(index < mData.size()) {
-            mData.add(index,changedData.copyData());
+        if(found ) {
+            mData.add(foundIndex,newData);
+            doNotifyUI();
+            return true;
         }
-        doNotifyUI();
+
+        return false;
     }
 
     public void deleteData(BaseMutableData data) {
@@ -163,7 +214,7 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
         }
         Iterator<BaseMutableData> iterator = mData.iterator();
         while (iterator.hasNext()) {
-            if(data.areSameItem(iterator.next())) {
+            if(data.uniqueFeature().equals(iterator.next().uniqueFeature())) {
                 iterator.remove();
                 break;
             }
@@ -195,15 +246,29 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
         return viewHolder;
     }
 
+    @Nullable
+    public <T extends BaseMutableData> T getUniqueData(Object uniqueFeature) {
+        for(BaseMutableData baseMutableData : mData) {
+           if(baseMutableData!=null && baseMutableData.uniqueFeature().equals(uniqueFeature) ) {
+               return (T) baseMutableData;
+           }
+        }
+        return null;
+
+    }
 
     public <T extends BaseMutableData> List<T> getData(Class<T> tClass) {
         List<T> typeLists = new ArrayList<>();
-        for(BaseMutableData baseImmutableData : mData) {
-            if(tClass.isInstance(baseImmutableData)) {
-                typeLists.add((T) baseImmutableData);
+        for(BaseMutableData baseMutableData : mData) {
+            if(tClass.isInstance(baseMutableData)) {
+                typeLists.add((T) baseMutableData);
             }
         }
         return typeLists;
+    }
+
+    public List<BaseMutableData> getData() {
+        return mData;
     }
 
     @Override

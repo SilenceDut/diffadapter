@@ -1,4 +1,4 @@
-package com.silencedut.diffadapter;
+package com.silencedut.diffadapter.data;
 
 /**
  * @author SilenceDut
