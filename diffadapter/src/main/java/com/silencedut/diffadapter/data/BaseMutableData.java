@@ -9,13 +9,10 @@ import com.silencedut.diffadapter.IProvideItemId;
  *
  * @author SilenceDut
  * @date 2018/9/6
- * 直接实现BaseMutableData的 **数据对象** 在显示期间内容可能会变化，如异步读取头像，昵称，等级等异步获取等，需自行实现{@link #copyData()}接口
- * ，并提供{@link #matchChangeFeature()}，如过数据在显示期间不需要动态变化或者数据对象每次都是新创建的用来展示，
- *  可使用 {@link BaseImmutableData }
+ * 直接实现BaseMutableData的在显示期间内容可能会变化，如异步读取头像，昵称，等级等异步获取等，
  */
 
 public abstract class BaseMutableData<T extends BaseMutableData> implements IProvideItemId {
-
 
 
     /**
@@ -46,9 +43,5 @@ public abstract class BaseMutableData<T extends BaseMutableData> implements IPro
         return uniqueItemFeature();
     }
 
-    /**
-     * 创建一个新对象，拷贝当前的数据，用于DiffUtil的拷贝
-     * @return 新的对象
-     */
-    public abstract T copyData();
+
 }

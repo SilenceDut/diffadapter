@@ -1,6 +1,5 @@
 package com.silencedut.diffadapter.utils;
 
-import com.silencedut.diffadapter.data.BaseImmutableData;
 import com.silencedut.diffadapter.data.BaseMutableData;
 
 /**

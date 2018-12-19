@@ -24,9 +24,6 @@ class ImageData(var uid: Long, var sourceId: Int, var name: String) : BaseMutabl
         return this.sourceId == newData.sourceId
     }
 
-    override fun copyData(): ImageData {
-        return ImageData(uid,sourceId,name)
-    }
 
     override fun uniqueItemFeature(): Any {
         return this.name

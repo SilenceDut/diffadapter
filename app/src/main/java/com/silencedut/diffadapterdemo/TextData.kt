@@ -23,10 +23,6 @@ class TextData(var uid:Long,var content:String,var backgroundColor:Int = Color.T
         return this.content == newData.content && this.backgroundColor == newData.backgroundColor
     }
 
-    override fun copyData(): TextData {
-        return TextData(uid,content,backgroundColor)
-    }
-
     override fun uniqueItemFeature(): Any {
        return this.uid
     }

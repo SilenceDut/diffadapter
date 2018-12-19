@@ -9,7 +9,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
-import android.support.v7.recyclerview.extensions.AsyncListDiffer;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -22,6 +21,7 @@ import com.silencedut.diffadapter.data.BaseDiffPayloadData;
 import com.silencedut.diffadapter.data.BaseMutableData;
 import com.silencedut.diffadapter.holder.BaseDiffViewHolder;
 import com.silencedut.diffadapter.holder.NoDataDifferHolder;
+import com.silencedut.diffadapter.utils.AsyncListUpdateDiffer;
 import com.silencedut.diffadapter.utils.UpdateFunction;
 
 import java.lang.reflect.Constructor;
@@ -51,7 +51,7 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
 
     private LayoutInflater mInflater;
     private LifecycleOwner mLifecycleOwner;
-    private AsyncListDiffer<BaseMutableData> mDifferHelper;
+    private AsyncListUpdateDiffer<BaseMutableData> mDifferHelper;
     private MediatorLiveData mUpdateMediatorLiveData = new MediatorLiveData<>();
     public DiffAdapter.HolderClickListener mHolderClickListener;
     public Fragment attachedFragment;
@@ -74,7 +74,8 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
 
             }
         });
-        mDifferHelper = new AsyncListDiffer(this, new DiffUtil.ItemCallback<BaseMutableData>() {
+
+        mDifferHelper = new AsyncListUpdateDiffer(this, new DiffUtil.ItemCallback<BaseMutableData>() {
             @Override
             public boolean areItemsTheSame(@NonNull BaseMutableData oldItem, @NonNull BaseMutableData newItem) {
                 return oldItem.getItemViewId() == newItem.getItemViewId()
@@ -172,7 +173,7 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
                     Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
 
                     if(oldData != null &&  actualTypeArguments.length > 1 && actualTypeArguments[1] == oldData.getClass()) {
-                        updateData(updateFunction.applyChange(dataSource,oldData.copyData()));
+                        updateData(updateFunction.applyChange(dataSource,oldData));
                     }
                 }
             }
@@ -191,21 +192,23 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
 
         Iterator<BaseMutableData> iterator = mData.iterator();
         int foundIndex = -1;
-        boolean found = false;
+
         while (iterator.hasNext()) {
             BaseMutableData data = iterator.next();
             foundIndex ++;
-            if(data.getItemViewId() == newData.getItemViewId() && newData.uniqueItemFeature().equals(data.uniqueItemFeature())) {
-                iterator.remove();
-                found = true;
-                break;
-            }
 
-        }
-        if(found ) {
-            mData.add(foundIndex,newData);
-            doNotifyUI();
-            return true;
+            if(newData == data) {
+                // same instance change content
+                mDifferHelper.updateSingleItem(mData,foundIndex);
+                return true;
+            } else if(data.getItemViewId() == newData.getItemViewId()
+                    && newData.uniqueItemFeature().equals(data.uniqueItemFeature()) && !newData.areUISame(data)) {
+                // diff instance has same feature
+                iterator.remove();
+                mData.add(foundIndex,newData);
+                mDifferHelper.updateSingleItem(mData,foundIndex);
+                return true;
+            }
         }
 
         return false;

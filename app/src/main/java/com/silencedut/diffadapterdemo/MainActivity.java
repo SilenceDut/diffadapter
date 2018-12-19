@@ -4,6 +4,7 @@ import android.arch.lifecycle.MutableLiveData;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -34,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
         scheduleUpdate();
 
         final MutableLiveData<DataSource> changedImageSource = new MutableLiveData<>();
-
+        ((DefaultItemAnimator) mRVTest.getItemAnimator()).setSupportsChangeAnimations(false);
         mDiffAdapter.addUpdateMediator(changedImageSource, new UpdateFunction<DataSource,ImageData>() {
             @Override
             public Object providerMatchFeature(DataSource input) {
