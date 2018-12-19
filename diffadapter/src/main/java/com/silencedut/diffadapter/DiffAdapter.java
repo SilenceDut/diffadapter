@@ -52,7 +52,7 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
     private LayoutInflater mInflater;
     private LifecycleOwner mLifecycleOwner;
     private AsyncListDiffer<BaseMutableData> mDifferHelper;
-    private MediatorLiveData mUpdateMediatorLiveData = new MediatorLiveData<BaseMutableData>();
+    private MediatorLiveData mUpdateMediatorLiveData = new MediatorLiveData<>();
     public DiffAdapter.HolderClickListener mHolderClickListener;
     public Fragment attachedFragment;
     public Context mContext;
@@ -68,16 +68,17 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
         this.mContext = appCompatActivity;
         this.mInflater = LayoutInflater.from(appCompatActivity);
         this.mLifecycleOwner = appCompatActivity;
-        this.mUpdateMediatorLiveData.observe(mLifecycleOwner, new Observer<BaseMutableData>() {
+        this.mUpdateMediatorLiveData.observe(mLifecycleOwner, new Observer() {
             @Override
-            public void onChanged(@Nullable BaseMutableData newData) {
-                updateData(newData);
+            public void onChanged(@Nullable Object o) {
+
             }
         });
         mDifferHelper = new AsyncListDiffer(this, new DiffUtil.ItemCallback<BaseMutableData>() {
             @Override
             public boolean areItemsTheSame(@NonNull BaseMutableData oldItem, @NonNull BaseMutableData newItem) {
-                return oldItem.getItemViewId() == newItem.getItemViewId() && oldItem.uniqueFeature().equals(newItem.uniqueFeature());
+                return oldItem.getItemViewId() == newItem.getItemViewId()
+                        && oldItem.uniqueItemFeature().equals(newItem.uniqueItemFeature());
 
             }
 
@@ -164,13 +165,15 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
             @Override
             public void onChanged(@Nullable T dataSource) {
 
-                BaseMutableData oldData = getUniqueData(updateFunction.providerUniqueFeature(dataSource));
+                List<BaseMutableData> oldMatchedDatas = getMatchedData(updateFunction.providerMatchFeature(dataSource));
 
-                ParameterizedType parameterizedType = (ParameterizedType) updateFunction.getClass().getGenericInterfaces()[0];
-                Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+                for(BaseMutableData oldData : oldMatchedDatas) {
+                    ParameterizedType parameterizedType = (ParameterizedType) updateFunction.getClass().getGenericInterfaces()[0];
+                    Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
 
-                if(oldData != null &&  actualTypeArguments.length > 1 && actualTypeArguments[1] == oldData.getClass()) {
-                    mUpdateMediatorLiveData.setValue(updateFunction.apply(dataSource,oldData.copyData()));
+                    if(oldData != null &&  actualTypeArguments.length > 1 && actualTypeArguments[1] == oldData.getClass()) {
+                        updateData(updateFunction.applyChange(dataSource,oldData.copyData()));
+                    }
                 }
             }
         });
@@ -192,7 +195,7 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
         while (iterator.hasNext()) {
             BaseMutableData data = iterator.next();
             foundIndex ++;
-            if(data.getItemViewId() == newData.getItemViewId() && newData.uniqueFeature().equals(data.uniqueFeature())) {
+            if(data.getItemViewId() == newData.getItemViewId() && newData.uniqueItemFeature().equals(data.uniqueItemFeature())) {
                 iterator.remove();
                 found = true;
                 break;
@@ -214,7 +217,7 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
         }
         Iterator<BaseMutableData> iterator = mData.iterator();
         while (iterator.hasNext()) {
-            if(data.uniqueFeature().equals(iterator.next().uniqueFeature())) {
+            if(data.uniqueItemFeature().equals(iterator.next().uniqueItemFeature())) {
                 iterator.remove();
                 break;
             }
@@ -246,14 +249,15 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
         return viewHolder;
     }
 
-    @Nullable
-    public <T extends BaseMutableData> T getUniqueData(Object uniqueFeature) {
+
+    public List<BaseMutableData> getMatchedData(Object matchChangeFeature) {
+        List<BaseMutableData> matchedMutableData = new ArrayList<>();
         for(BaseMutableData baseMutableData : mData) {
-           if(baseMutableData!=null && baseMutableData.uniqueFeature().equals(uniqueFeature) ) {
-               return (T) baseMutableData;
+           if(baseMutableData!=null && baseMutableData.matchChangeFeature().equals(matchChangeFeature) ) {
+               matchedMutableData.add(baseMutableData);
            }
         }
-        return null;
+        return matchedMutableData;
 
     }
 

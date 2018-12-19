@@ -37,14 +37,14 @@ public class MainActivity extends AppCompatActivity {
 
         mDiffAdapter.addUpdateMediator(changedImageSource, new UpdateFunction<DataSource,ImageData>() {
             @Override
-            public Object providerUniqueFeature(DataSource input) {
+            public Object providerMatchFeature(DataSource input) {
                 return input.getUid();
             }
 
             @Override
-            public ImageData apply(DataSource input, ImageData originalData) {
-
-                 return new ImageData(originalData.getUid(),input.getResId(),originalData.getName());
+            public ImageData applyChange(DataSource input, ImageData originalData) {
+                 originalData.setSourceId(input.getResId());
+                 return originalData;
             }
         });
 
@@ -52,28 +52,27 @@ public class MainActivity extends AppCompatActivity {
 
         mDiffAdapter.addUpdateMediator(changedTextSource, new UpdateFunction<DataSource,TextData>() {
             @Override
-            public Object providerUniqueFeature(DataSource input) {
+            public Object providerMatchFeature(DataSource input) {
                 return input.getUid();
             }
 
             @Override
-            public TextData apply(DataSource input, TextData originalData) {
-
-                return new TextData(originalData.getUid(),input.getContent(),originalData.getBackgroundColor());
+            public TextData applyChange(DataSource input, TextData originalData) {
+                originalData.setContent(input.getContent());
+                return originalData;
             }
         });
 
         final MutableLiveData<DataSource2> changedTextSource2 = new MutableLiveData<>();
         mDiffAdapter.addUpdateMediator(changedTextSource2, new UpdateFunction<DataSource2,TextData>() {
             @Override
-            public Object providerUniqueFeature(DataSource2 input) {
+            public Object providerMatchFeature(DataSource2 input) {
                 return input.getUid();
             }
-
             @Override
-            public TextData apply(DataSource2 input, TextData originalData) {
-
-                return new TextData(originalData.getUid(),originalData.getContent(),input.getBackgroundColor());
+            public TextData applyChange(DataSource2 input, TextData originalData) {
+                originalData.setBackgroundColor(input.getBackgroundColor());
+                return originalData;
             }
         });
 
@@ -113,14 +112,17 @@ public class MainActivity extends AppCompatActivity {
 
     private void scheduleUpdate() {
         List<BaseMutableData> datas = new ArrayList<>();
+
         datas.add(new ImageData(0, R.mipmap.ic_launcher_round, "launcher"));
+        datas.add(new ImageData(0, R.drawable.ic_launcher_background, "launcher1"));
 
         datas.add(new TextData(4,"4",Color.TRANSPARENT));
-        datas.add(new ImageData(1, R.mipmap.ic_launcher_round, "launcher_round"));
+        datas.add(new ImageData(1, R.mipmap.ic_launcher_round, "launcher_round2"));
+        datas.add(new ImageData(1, R.drawable.ic_launcher_background, "launcher_round5"));
         datas.add(new TextData(5,"5",Color.TRANSPARENT));
-        datas.add(new ImageData(2, R.mipmap.ic_launcher_round, "launcher_round"));
+        datas.add(new ImageData(2, R.mipmap.ic_launcher_round, "launcher_round3"));
         datas.add(new TextData(6,"6",Color.TRANSPARENT));
-        datas.add(new ImageData(3, R.mipmap.ic_launcher_round, "launcher_round"));
+        datas.add(new ImageData(3, R.mipmap.ic_launcher_round, "launcher_round4"));
 
 
         datas.add(new TextData(7,"7",Color.TRANSPARENT));

@@ -34,4 +34,5 @@ dependencies {
     implementation "com.android.support:recyclerview-v7:$_supportVersion"
     implementation "android.arch.lifecycle:extensions:$lifecycle_extensions"
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+
 }
