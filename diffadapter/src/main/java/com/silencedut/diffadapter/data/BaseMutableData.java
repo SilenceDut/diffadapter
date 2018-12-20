@@ -38,7 +38,9 @@ public abstract class BaseMutableData<T extends BaseMutableData> implements IPro
     
 
     /**
-     * 提供一个用来匹配列表中所有的需要变化的数据的特征，一般情况下可同{@link #uniqueItemFeature()}，
+     * 提供一个或多个用来匹配列表中所有的需要变化的数据的特征，也就是找出数据中包含该mMathFeature里的特征的数据，
+     * 和{@link com.silencedut.diffadapter.utils.UpdateFunction()}结合使用
+     * 一般情况下可用{@link #uniqueItemFeature()}
      * 但有些情况不同，即匹配的数据不止一条，如聊天里同一个uid不止一条数据，{@link #uniqueItemFeature()}就只能用msgId之类的， 这时可按需复写这个方法
      * @return 用来匹配变化的数据的特征，最常用的比如uid
      */

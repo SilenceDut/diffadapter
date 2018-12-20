@@ -129,15 +129,18 @@ public class AsyncListUpdateDiffer<T> {
     }
 
     void latchList(@NonNull List<T> newList, @NonNull DiffUtil.DiffResult diffResult) {
-        this.mList = newList;
-        this.mReadOnlyList = Collections.unmodifiableList(newList);
+        updateInnerList(newList);
         diffResult.dispatchUpdatesTo(this.mUpdateCallback);
     }
 
     public void updateSingleItem(List<T> newList,int changedPosition) {
+        updateInnerList(newList);
+        mAttachedAdapter.notifyItemChanged(changedPosition);
+    }
+
+    public void updateInnerList(List<T> newList) {
         this.mList = newList;
         this.mReadOnlyList = Collections.unmodifiableList(newList);
-        mAttachedAdapter.notifyItemChanged(changedPosition);
     }
 
     private static class MainThreadExecutor implements Executor {

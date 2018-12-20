@@ -154,12 +154,13 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
      */
     public void setData(List<? extends BaseMutableData> datas) {
         mData.clear();
-        addData(datas);
+        mData.addAll(datas);
+        doNotifyUI();
     }
 
     public void clear() {
         mData.clear();
-        doNotifyUI();
+        notifyDataSetChanged();
     }
 
     public <T extends BaseMutableData> void addData(T data) {
@@ -167,7 +168,8 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
             return;
         }
         mData.add(data);
-        doNotifyUI();
+        mDifferHelper.updateInnerList(mData);
+        notifyItemChanged(mData.size()-1);
     }
 
 
@@ -180,7 +182,8 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
             return;
         }
         mData.addAll(datas);
-        doNotifyUI();
+        mDifferHelper.updateInnerList(mData);
+        notifyItemChanged(mData.size() - datas.size(),datas.size());
     }
 
 
@@ -222,13 +225,18 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
             return;
         }
         Iterator<BaseMutableData> iterator = mData.iterator();
+        int position = -1;
         while (iterator.hasNext()) {
+            position ++;
+
             if(data.uniqueItemFeature().equals(iterator.next().uniqueItemFeature())) {
                 iterator.remove();
+                mDifferHelper.updateInnerList(mData);
+                notifyItemRemoved(position);
                 break;
             }
         }
-        doNotifyUI();
+
     }
 
     public void deleteData(int startPosition, int size) {
@@ -238,10 +246,11 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
         Iterator<BaseMutableData> iterator = mData.iterator();
         int deleteSize =0;
         while (iterator.hasNext() && deleteSize < size) {
+            iterator.next();
             iterator.remove();
             deleteSize++;
         }
-        doNotifyUI();
+        notifyItemRangeRemoved(startPosition,size);
     }
 
     public void insertData(int startPosition ,List<? extends BaseMutableData> datas) {
@@ -249,7 +258,7 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
             return;
         }
         mData.addAll(startPosition,datas);
-        doNotifyUI();
+        notifyItemChanged(startPosition,datas.size());
     }
 
     private void doNotifyUI() {
