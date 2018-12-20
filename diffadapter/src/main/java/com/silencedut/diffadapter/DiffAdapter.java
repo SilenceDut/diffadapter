@@ -126,6 +126,25 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
         setData(data);
     }
 
+    public <T> void  addUpdateMediator(LiveData<T> elementData, final UpdateFunction updateFunction) {
+        mUpdateMediatorLiveData.addSource(elementData, new Observer<T>() {
+            @Override
+            public void onChanged(@Nullable T dataSource) {
+
+                List<BaseMutableData> oldMatchedDatas = getMatchedData(updateFunction.providerMatchFeature(dataSource));
+
+                for(BaseMutableData oldData : oldMatchedDatas) {
+                    ParameterizedType parameterizedType = (ParameterizedType) updateFunction.getClass().getGenericInterfaces()[0];
+                    Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+
+                    if(oldData != null &&  actualTypeArguments.length > 1 && actualTypeArguments[1] == oldData.getClass()) {
+                        updateData(updateFunction.applyChange(dataSource,oldData));
+                    }
+                }
+            }
+        });
+    }
+
 
     /**
      * @param datas 需要展示的数据,如果数据的每一项不是新new出来的，需要自行实现copyData来创建新的对象
@@ -159,25 +178,6 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
         }
         mData.addAll(datas);
         doNotifyUI();
-    }
-
-    public <T> void  addUpdateMediator(LiveData<T> elementData, final UpdateFunction updateFunction) {
-        mUpdateMediatorLiveData.addSource(elementData, new Observer<T>() {
-            @Override
-            public void onChanged(@Nullable T dataSource) {
-
-                List<BaseMutableData> oldMatchedDatas = getMatchedData(updateFunction.providerMatchFeature(dataSource));
-
-                for(BaseMutableData oldData : oldMatchedDatas) {
-                    ParameterizedType parameterizedType = (ParameterizedType) updateFunction.getClass().getGenericInterfaces()[0];
-                    Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
-
-                    if(oldData != null &&  actualTypeArguments.length > 1 && actualTypeArguments[1] == oldData.getClass()) {
-                        updateData(updateFunction.applyChange(dataSource,oldData));
-                    }
-                }
-            }
-        });
     }
 
 
@@ -228,11 +228,34 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
         doNotifyUI();
     }
 
+    public void deleteData(int startPosition, int size) {
+        if (startPosition > mData.size()) {
+            return;
+        }
+        Iterator<BaseMutableData> iterator = mData.iterator();
+        int deleteSize =0;
+        while (iterator.hasNext() && deleteSize < size) {
+            iterator.remove();
+            deleteSize++;
+        }
+        doNotifyUI();
+    }
+
+    public void insertData(int startPosition ,List<? extends BaseMutableData> datas) {
+        if (datas == null) {
+            return;
+        }
+        mData.addAll(startPosition,datas);
+        doNotifyUI();
+    }
+
     private void doNotifyUI() {
         List<BaseMutableData> newList = new ArrayList<>(mData);
         mDifferHelper.submitList(newList);
 
     }
+
+
 
     @NonNull
     @Override
