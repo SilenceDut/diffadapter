@@ -1,5 +1,7 @@
 package com.silencedut.diffadapter.utils;
 
+import android.support.annotation.NonNull;
+
 import com.silencedut.diffadapter.data.BaseMutableData;
 
 /**
@@ -13,14 +15,14 @@ public interface UpdateFunction<I,R extends BaseMutableData> {
      * @param input 用来提供查找数据和最终改变列表的数据
      * @return 同 <p> {@link BaseMutableData # matchChangeFeature() }
      */
-    Object providerMatchFeature(I input);
+    Object providerMatchFeature(@NonNull I input);
 
     /**
      * 只需关心自己需要更改的部分
      * @param input 是数据改变的部分数据源
-     * @param originalCopyData 需要改变的数据项
-     * @return 改变后的数据项，可以是新new的对象对应<p> {@link BaseImmutableData  ，也可以是在原对象进行修改后的对象<p> {@link BaseMutableData
+     * @param originalData 需要改变的数据项
+     * @return 改变后的数据项
      */
-    R applyChange(I input, R originalCopyData);
+    R applyChange(I input, R originalData);
 
 }

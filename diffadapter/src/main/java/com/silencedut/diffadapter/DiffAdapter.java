@@ -131,16 +131,19 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
             @Override
             public void onChanged(@Nullable T dataSource) {
 
-                List<BaseMutableData> oldMatchedDatas = getMatchedData(updateFunction.providerMatchFeature(dataSource));
+                if(dataSource!=null) {
+                    List<BaseMutableData> oldMatchedDatas = getMatchedData(updateFunction.providerMatchFeature(dataSource));
 
-                for(BaseMutableData oldData : oldMatchedDatas) {
-                    ParameterizedType parameterizedType = (ParameterizedType) updateFunction.getClass().getGenericInterfaces()[0];
-                    Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+                    for(BaseMutableData oldData : oldMatchedDatas) {
+                        ParameterizedType parameterizedType = (ParameterizedType) updateFunction.getClass().getGenericInterfaces()[0];
+                        Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
 
-                    if(oldData != null &&  actualTypeArguments.length > 1 && actualTypeArguments[1] == oldData.getClass()) {
-                        updateData(updateFunction.applyChange(dataSource,oldData));
+                        if(oldData != null &&  actualTypeArguments.length > 1 && actualTypeArguments[1] == oldData.getClass()) {
+                            updateData(updateFunction.applyChange(dataSource,oldData));
+                        }
                     }
                 }
+
             }
         });
     }
@@ -249,7 +252,7 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
         doNotifyUI();
     }
 
-    public void doNotifyUI() {
+    private void doNotifyUI() {
         List<BaseMutableData> newList = new ArrayList<>(mData);
         mDifferHelper.submitList(newList);
     }
