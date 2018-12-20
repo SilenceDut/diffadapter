@@ -249,10 +249,9 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
         doNotifyUI();
     }
 
-    private void doNotifyUI() {
+    public void doNotifyUI() {
         List<BaseMutableData> newList = new ArrayList<>(mData);
         mDifferHelper.submitList(newList);
-
     }
 
 
