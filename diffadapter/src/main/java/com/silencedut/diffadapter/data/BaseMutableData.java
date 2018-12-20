@@ -5,6 +5,9 @@ import android.support.annotation.NonNull;
 
 import com.silencedut.diffadapter.IProvideItemId;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  *
  * @author SilenceDut
@@ -13,6 +16,7 @@ import com.silencedut.diffadapter.IProvideItemId;
  */
 
 public abstract class BaseMutableData<T extends BaseMutableData> implements IProvideItemId {
+    private Set<Object> mMathFeature = new HashSet<>();
 
 
     /**
@@ -39,8 +43,13 @@ public abstract class BaseMutableData<T extends BaseMutableData> implements IPro
      * @return 用来匹配变化的数据的特征，最常用的比如uid
      */
     @NonNull
-    public Object matchChangeFeature(){
-        return uniqueItemFeature();
+    public final Set<Object> matchChangeFeatures(){
+        appendMatchFeature(mMathFeature);
+        return mMathFeature;
+    }
+
+    public void appendMatchFeature(@NonNull Set<Object> allMatchFeatures) {
+        allMatchFeatures.add(uniqueItemFeature());
     }
 
 

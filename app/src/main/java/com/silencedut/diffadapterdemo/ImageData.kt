@@ -16,14 +16,15 @@ class ImageData(var uid: Long, var sourceId: Int, var name: String) : BaseMutabl
         return VIEW_ID
     }
 
-    override fun matchChangeFeature(): Any {
-        return uid
+
+    override fun appendMatchFeature(allMatchFeatures: MutableSet<Any>) {
+        super.appendMatchFeature(allMatchFeatures)
+        allMatchFeatures.add(uid)
     }
 
     override fun areUISame(newData: ImageData): Boolean {
         return this.sourceId == newData.sourceId
     }
-
 
     override fun uniqueItemFeature(): Any {
         return this.name

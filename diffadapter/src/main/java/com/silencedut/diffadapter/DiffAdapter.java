@@ -281,7 +281,7 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
     public List<BaseMutableData> getMatchedData(Object matchChangeFeature) {
         List<BaseMutableData> matchedMutableData = new ArrayList<>();
         for(BaseMutableData baseMutableData : mData) {
-           if(baseMutableData!=null && baseMutableData.matchChangeFeature().equals(matchChangeFeature) ) {
+           if(baseMutableData!=null && baseMutableData.matchChangeFeatures().contains(matchChangeFeature) ) {
                matchedMutableData.add(baseMutableData);
            }
         }

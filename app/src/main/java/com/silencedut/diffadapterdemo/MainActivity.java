@@ -90,23 +90,23 @@ public class MainActivity extends AppCompatActivity {
             }
         },1500);
 
-        mRVTest.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                changedTextSource.setValue(new DataSource(uid,R.drawable.ic_launcher_foreground,"新的内容:"+uid*2));
-                mRVTest.postDelayed(this,1000);
-
-            }
-        },1000);
-
-        mRVTest.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                changedTextSource2.setValue(new DataSource2(uid,Color.WHITE,""));
-                mRVTest.postDelayed(this,1300);
-
-            }
-        },1300);
+//        mRVTest.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                changedTextSource.setValue(new DataSource(uid,R.drawable.ic_launcher_foreground,"新的内容:"+uid*2));
+//                mRVTest.postDelayed(this,1000);
+//
+//            }
+//        },1000);
+//
+//        mRVTest.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                changedTextSource2.setValue(new DataSource2(uid,Color.WHITE,""));
+//                mRVTest.postDelayed(this,1300);
+//
+//            }
+//        },1300);
     }
 
 
