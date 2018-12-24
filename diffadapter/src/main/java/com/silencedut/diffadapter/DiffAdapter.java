@@ -132,18 +132,30 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
             public void onChanged(@Nullable T dataSource) {
 
                 if(dataSource!=null) {
-                    List<BaseMutableData> oldMatchedDatas = getMatchedData(updateFunction.providerMatchFeature(dataSource));
+
+                    Object matchFeature = updateFunction.providerMatchFeature(dataSource);
+
+                    ParameterizedType parameterizedType = (ParameterizedType) updateFunction.getClass().getGenericInterfaces()[0];
+                    Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+                    Type neededDataType ;
+                    if(actualTypeArguments.length > 1 ) {
+                        neededDataType = actualTypeArguments[1];
+                    }else {
+                        return;
+                    }
+                    List<BaseMutableData> oldMatchedDatas;
+                    if(UpdateFunction.MATCH_ALL.equals(matchFeature)) {
+                        oldMatchedDatas = getData((Class<BaseMutableData>) neededDataType);
+                    }else {
+                        oldMatchedDatas = getMatchedData(updateFunction.providerMatchFeature(dataSource),(Class<BaseMutableData>) neededDataType);
+                    }
 
                     for(BaseMutableData oldData : oldMatchedDatas) {
-                        ParameterizedType parameterizedType = (ParameterizedType) updateFunction.getClass().getGenericInterfaces()[0];
-                        Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
-
-                        if(oldData != null &&  actualTypeArguments.length > 1 && actualTypeArguments[1] == oldData.getClass()) {
+                        if(oldData != null ) {
                             updateData(updateFunction.applyChange(dataSource,oldData));
                         }
                     }
                 }
-
             }
         });
     }
@@ -287,11 +299,11 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
     }
 
 
-    public List<BaseMutableData> getMatchedData(Object matchChangeFeature) {
-        List<BaseMutableData> matchedMutableData = new ArrayList<>();
+    private  <T extends BaseMutableData> List<T> getMatchedData(Object matchChangeFeature,Class<T> tClass) {
+        List<T> matchedMutableData = new ArrayList<>();
         for(BaseMutableData baseMutableData : mData) {
-           if(baseMutableData!=null && baseMutableData.matchChangeFeatures().contains(matchChangeFeature) ) {
-               matchedMutableData.add(baseMutableData);
+           if(baseMutableData!=null && baseMutableData.matchChangeFeatures().contains(matchChangeFeature) && tClass.isInstance(baseMutableData) ) {
+               matchedMutableData.add((T)baseMutableData);
            }
         }
         return matchedMutableData;

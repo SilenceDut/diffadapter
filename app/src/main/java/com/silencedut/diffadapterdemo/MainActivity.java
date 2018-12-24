@@ -39,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
         mDiffAdapter.addUpdateMediator(changedImageSource, new UpdateFunction<DataSource,ImageData>() {
             @Override
             public Object providerMatchFeature(DataSource input) {
+
                 return input.getUid();
             }
 

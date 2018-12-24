@@ -9,6 +9,10 @@ import com.silencedut.diffadapter.data.BaseMutableData;
  */
 public interface UpdateFunction<I,R extends BaseMutableData> {
 
+    /**
+     * 匹配所有数据，及返回类型为R的所有数据
+     */
+    Object MATCH_ALL = new Object();
 
     /**
      * 提供一个特征，用来查找列表数据中和此特征相同的数据
