@@ -3,6 +3,7 @@ package com.silencedut.diffadapterdemo;
 import android.arch.lifecycle.MutableLiveData;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -38,13 +39,13 @@ public class MainActivity extends AppCompatActivity {
         ((DefaultItemAnimator) mRVTest.getItemAnimator()).setSupportsChangeAnimations(false);
         mDiffAdapter.addUpdateMediator(changedImageSource, new UpdateFunction<DataSource,ImageData>() {
             @Override
-            public Object providerMatchFeature(DataSource input) {
+            public Object providerMatchFeature(@NonNull DataSource input) {
 
                 return input.getUid();
             }
 
             @Override
-            public ImageData applyChange(DataSource input, ImageData originalData) {
+            public ImageData applyChange(@NonNull DataSource input, @NonNull ImageData originalData) {
                  originalData.setSourceId(input.getResId());
                  return originalData;
             }
@@ -54,12 +55,12 @@ public class MainActivity extends AppCompatActivity {
 
         mDiffAdapter.addUpdateMediator(changedTextSource, new UpdateFunction<DataSource,TextData>() {
             @Override
-            public Object providerMatchFeature(DataSource input) {
+            public Object providerMatchFeature(@NonNull DataSource input) {
                 return input.getUid();
             }
 
             @Override
-            public TextData applyChange(DataSource input, TextData originalData) {
+            public TextData applyChange(@NonNull DataSource input, @NonNull TextData originalData) {
                 originalData.setContent(input.getContent());
                 return originalData;
             }
@@ -68,11 +69,11 @@ public class MainActivity extends AppCompatActivity {
         final MutableLiveData<DataSource2> changedTextSource2 = new MutableLiveData<>();
         mDiffAdapter.addUpdateMediator(changedTextSource2, new UpdateFunction<DataSource2,TextData>() {
             @Override
-            public Object providerMatchFeature(DataSource2 input) {
+            public Object providerMatchFeature(@NonNull DataSource2 input) {
                 return input.getUid();
             }
             @Override
-            public TextData applyChange(DataSource2 input, TextData originalData) {
+            public TextData applyChange(@NonNull DataSource2 input, @NonNull TextData originalData) {
                 originalData.setBackgroundColor(input.getBackgroundColor());
                 return originalData;
             }
