@@ -145,9 +145,9 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
                     }
                     List<BaseMutableData> oldMatchedDatas;
                     if(UpdateFunction.MATCH_ALL.equals(matchFeature)) {
-                        oldMatchedDatas = getData((Class<BaseMutableData>) neededDataType);
+                        oldMatchedDatas = getData(neededDataType);
                     }else {
-                        oldMatchedDatas = getMatchedData(updateFunction.providerMatchFeature(dataSource),(Class<BaseMutableData>) neededDataType);
+                        oldMatchedDatas = getMatchedData(updateFunction.providerMatchFeature(dataSource), neededDataType);
                     }
 
                     for(BaseMutableData oldData : oldMatchedDatas) {
@@ -299,10 +299,10 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
     }
 
 
-    private  <T extends BaseMutableData> List<T> getMatchedData(Object matchChangeFeature,Class<T> tClass) {
+    private  <T extends BaseMutableData> List<T> getMatchedData(Object matchChangeFeature,Type type) {
         List<T> matchedMutableData = new ArrayList<>();
         for(BaseMutableData baseMutableData : mData) {
-           if(baseMutableData!=null && baseMutableData.matchChangeFeatures().contains(matchChangeFeature) && tClass.isInstance(baseMutableData) ) {
+           if(baseMutableData!=null && baseMutableData.matchChangeFeatures().contains(matchChangeFeature) && type == baseMutableData.getClass() ) {
                matchedMutableData.add((T)baseMutableData);
            }
         }
@@ -310,14 +310,19 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
 
     }
 
-    public <T extends BaseMutableData> List<T> getData(Class<T> tClass) {
+    private  <T extends BaseMutableData> List<T> getData(Type type) {
         List<T> typeLists = new ArrayList<>();
         for(BaseMutableData baseMutableData : mData) {
-            if(tClass.isInstance(baseMutableData)) {
+            if(type == baseMutableData.getClass()) {
                 typeLists.add((T) baseMutableData);
             }
         }
         return typeLists;
+    }
+
+    public <T extends BaseMutableData> List<T> getData(Class<T> tClass) {
+
+        return getData(tClass);
     }
 
     public List<BaseMutableData> getData() {
