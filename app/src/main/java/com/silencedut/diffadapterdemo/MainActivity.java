@@ -61,8 +61,8 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public TextData applyChange(@NonNull DataSource input, @NonNull TextData originalData) {
-                originalData.setContent(input.getContent());
-                return originalData;
+
+                return new TextData(originalData.getUid(),input.getContent(),originalData.getBackgroundColor());
             }
         });
 
@@ -75,31 +75,35 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public TextData applyChange(@NonNull DataSource2 input, @NonNull TextData originalData) {
                 originalData.setBackgroundColor(input.getBackgroundColor());
-                return originalData;
+                return new TextData(originalData.getUid(),originalData.getContent(),originalData.getBackgroundColor());
             }
         });
-
-        mRVTest.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                Log.d("MainActivity","DataSource change");
-                mRVTest.postDelayed(this,1500);
-                changedImageSource.setValue(new DataSource(uid,R.drawable.ic_launcher_foreground,"xixi"));
-                uid ++;
-                if(uid > 7) {
-                    uid =0;
-                }
-            }
-        },1500);
 
 //        mRVTest.postDelayed(new Runnable() {
 //            @Override
 //            public void run() {
-//                changedTextSource.setValue(new DataSource(uid,R.drawable.ic_launcher_foreground,"新的内容:"+uid*2));
-//                mRVTest.postDelayed(this,1000);
-//
+//                Log.d("MainActivity","DataSource change");
+//                mRVTest.postDelayed(this,1500);
+//                changedImageSource.setValue(new DataSource(uid,R.drawable.ic_launcher_foreground,"xixi"));
+//                uid ++;
+//                if(uid > 7) {
+//                    uid =0;
+//                }
 //            }
-//        },1000);
+//        },1500);
+
+        mRVTest.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                changedTextSource.setValue(new DataSource(uid,R.drawable.ic_launcher_foreground,"新的内容:"+uid*2));
+                mRVTest.postDelayed(this,1000);
+                uid ++;
+                if(uid > 7) {
+                    uid =0;
+                }
+
+            }
+        },1000);
 //
 //        mRVTest.postDelayed(new Runnable() {
 //            @Override

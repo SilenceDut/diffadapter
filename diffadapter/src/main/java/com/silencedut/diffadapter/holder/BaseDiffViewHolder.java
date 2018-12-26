@@ -2,6 +2,7 @@ package com.silencedut.diffadapter.holder;
 
 import android.arch.lifecycle.ViewModel;
 import android.content.Context;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -53,10 +54,8 @@ public abstract class BaseDiffViewHolder<T extends BaseMutableData> extends Recy
 
     public abstract void updateItem(@NonNull T data, int position);
 
-    protected void onHolderClicked(int position, T data) {
-        if (mBaseAdapter.mHolderClickListener != null) {
-            mBaseAdapter.mHolderClickListener.onHolderClicked(position, data);
-        }
+    public void updateItem(@NonNull T data, int position, @NonNull Bundle payload){
+        this.updateItem(data,position);
     }
 
 

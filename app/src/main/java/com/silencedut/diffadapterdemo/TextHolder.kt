@@ -1,5 +1,6 @@
 package com.silencedut.diffadapterdemo
 
+import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.TextView
@@ -29,6 +30,17 @@ class TextHolder(itemViewRoot: View, recyclerAdapter: DiffAdapter): BaseDiffView
         Log.d(TAG,"updateItem")
         textView?.text = data.content
         textView?.setBackgroundColor(data.backgroundColor)
+    }
+
+    override fun updateItem(data: TextData, position: Int, payload: Bundle) {
+
+        Log.d(TAG,"updateItem payload content :"+payload.getString("content")+",backgroundColor : "+payload.getString("backgroundColor"))
+        if(payload.getString("content")!=null) {
+            textView?.text = data.content
+        }
+        if(payload.getString("backgroundColor")!=null) {
+            textView?.setBackgroundColor(data.backgroundColor)
+        }
     }
 
 }

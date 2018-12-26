@@ -5,6 +5,7 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MediatorLiveData;
 import android.arch.lifecycle.Observer;
 import android.content.Context;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -17,7 +18,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.silencedut.diffadapter.data.BaseDiffPayloadData;
 import com.silencedut.diffadapter.data.BaseMutableData;
 import com.silencedut.diffadapter.holder.BaseDiffViewHolder;
 import com.silencedut.diffadapter.holder.NoDataDifferHolder;
@@ -53,16 +53,11 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
     private LifecycleOwner mLifecycleOwner;
     private AsyncListUpdateDiffer<BaseMutableData> mDifferHelper;
     private MediatorLiveData mUpdateMediatorLiveData = new MediatorLiveData<>();
-    public DiffAdapter.HolderClickListener mHolderClickListener;
+
     public Fragment attachedFragment;
     public Context mContext;
 
-    /**
-     * 一般情况下没处理getChangePayload，默认在{@link #onBindViewHolder(BaseDiffViewHolder holder, int position)()}.更新数据
-     * ，而不是payload，使用payload的方式大大增加代码的繁琐性，降低库的易用性，实际的payload对性能的影响很小，只不过在跟新UI的时候少更新几项，
-     *  如果对数据刷新很敏感，实现{@link BaseDiffPayloadData#Object getPayload(T newData)}即可
-     *
-     */
+
     @SuppressWarnings("unchecked")
     public DiffAdapter(FragmentActivity appCompatActivity) {
         this.mContext = appCompatActivity;
@@ -91,10 +86,8 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
 
             @Override
             public Object getChangePayload(@NonNull BaseMutableData oldItem, @NonNull BaseMutableData newItem) {
-                if (oldItem instanceof BaseDiffPayloadData) {
-                    return ((BaseDiffPayloadData) oldItem).getPayload(newItem);
-                }
-                return super.getChangePayload(oldItem, newItem);
+
+                return oldItem.getDiffPayload(newItem);
             }
         });
     }
@@ -217,14 +210,14 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
 
             if(newData == data) {
                 // same instance change content
-                mDifferHelper.updateSingleItem(mData,foundIndex);
+                mDifferHelper.updateSingleItem(mData,foundIndex,data.getDiffPayload(newData));
                 return true;
             } else if(data.getItemViewId() == newData.getItemViewId()
-                    && newData.uniqueItemFeature().equals(data.uniqueItemFeature()) && !newData.areUISame(data)) {
+                    && newData.uniqueItemFeature().equals(data.uniqueItemFeature()) ) {
                 // diff instance has same feature
                 iterator.remove();
                 mData.add(foundIndex,newData);
-                mDifferHelper.updateSingleItem(mData,foundIndex);
+                mDifferHelper.updateSingleItem(mData,foundIndex,data.getDiffPayload(newData));
                 return true;
             }
         }
@@ -298,13 +291,47 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
         return viewHolder;
     }
 
+    @Override
+    public void onBindViewHolder(@NonNull BaseDiffViewHolder baseDiffViewHolder, int position) {
+
+        try {
+            baseDiffViewHolder.updateItem(mDifferHelper.getCurrentList().get(position), position);
+        }catch (Exception e) {
+            Log.e(TAG,"onBindViewHolder updateItem error",e);
+        }
+    }
+
+
+    @Override
+    public void onBindViewHolder(@NonNull BaseDiffViewHolder holder, int position, @NonNull List<Object> payloads) {
+
+        if (mDifferHelper.getCurrentList().size() == 0 || mDifferHelper.getCurrentList().get(position)==null) {
+            return;
+        }
+
+        if (getItemViewType(position) != holder.getItemViewId()) {
+            return;
+        }
+
+        if (payloads.isEmpty()) {
+            this.onBindViewHolder(holder,position);
+        }else  {
+            try {
+                holder.updateItem(mDifferHelper.getCurrentList().get(position), position,(Bundle) payloads.get(0));
+            }catch (Exception e) {
+                Log.e(TAG,"onBindViewHolder updateItem payload error",e);
+            }
+        }
+
+    }
+
 
     private  <T extends BaseMutableData> List<T> getMatchedData(Object matchChangeFeature,Type type) {
         List<T> matchedMutableData = new ArrayList<>();
         for(BaseMutableData baseMutableData : mData) {
-           if(baseMutableData!=null && baseMutableData.matchChangeFeatures().contains(matchChangeFeature) && type == baseMutableData.getClass() ) {
-               matchedMutableData.add((T)baseMutableData);
-           }
+            if(baseMutableData!=null && baseMutableData.matchChangeFeatures().contains(matchChangeFeature) && type == baseMutableData.getClass() ) {
+                matchedMutableData.add((T)baseMutableData);
+            }
         }
         return matchedMutableData;
 
@@ -321,31 +348,19 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
     }
 
     public <T extends BaseMutableData> List<T> getData(Class<T> tClass) {
-
-        return getData(tClass);
+        List<T> classLists = new ArrayList<>();
+        for(BaseMutableData baseMutableData : mData) {
+            if(tClass == baseMutableData.getClass()) {
+                classLists.add((T) baseMutableData);
+            }
+        }
+        return classLists;
     }
 
     public List<BaseMutableData> getData() {
         return mData;
     }
 
-    @Override
-    public void onBindViewHolder(@NonNull BaseDiffViewHolder holder, int position) {
-        if (mDifferHelper.getCurrentList().size() == 0 || mDifferHelper.getCurrentList().get(position)==null) {
-            return;
-        }
-
-        if (getItemViewType(position) != holder.getItemViewId()) {
-            return;
-        }
-
-        try {
-            holder.updateItem(mDifferHelper.getCurrentList().get(position), position);
-        }catch (Exception e) {
-            Log.e(TAG,"onBindViewHolder updateItem error",e);
-        }
-
-    }
 
     @Override
     public int getItemCount() {
@@ -357,17 +372,4 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
         return mDifferHelper.getCurrentList().get(position).getItemViewId();
     }
 
-    public void setOnHolderClickListener(DiffAdapter.HolderClickListener clickListener) {
-        this.mHolderClickListener = clickListener;
-    }
-
-    public  interface HolderClickListener <T extends BaseMutableData>{
-        void onHolderClicked(int position, T data);
-    }
-
-    public <T extends BaseMutableData> void onHolderClicked(int position, T data) {
-        if(mHolderClickListener!=null) {
-            mHolderClickListener.onHolderClicked(position,data);
-        }
-    }
 }

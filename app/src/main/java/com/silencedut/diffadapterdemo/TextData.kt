@@ -1,6 +1,7 @@
 package com.silencedut.diffadapterdemo
 
 import android.graphics.Color
+import android.os.Bundle
 import com.silencedut.diffadapter.data.BaseMutableData
 
 /**
@@ -21,6 +22,17 @@ class TextData(var uid:Long,var content:String,var backgroundColor:Int = Color.T
 
     override fun areUISame(newData: TextData): Boolean {
         return this.content == newData.content && this.backgroundColor == newData.backgroundColor
+    }
+
+
+    override fun appendDiffPayload(newData: TextData, diffPayloadBundle: Bundle) {
+        super.appendDiffPayload(newData, diffPayloadBundle)
+        if(this.content != newData.content) {
+            diffPayloadBundle.putString("content",content)
+        }
+        if(this.backgroundColor != newData.backgroundColor) {
+            diffPayloadBundle.putInt("backgroundColor",backgroundColor)
+        }
     }
 
     override fun uniqueItemFeature(): Any {

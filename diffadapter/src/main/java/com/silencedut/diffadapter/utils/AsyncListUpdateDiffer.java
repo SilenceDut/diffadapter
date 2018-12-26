@@ -1,5 +1,6 @@
 package com.silencedut.diffadapter.utils;
 
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
@@ -133,9 +134,14 @@ public class AsyncListUpdateDiffer<T> {
         diffResult.dispatchUpdatesTo(this.mUpdateCallback);
     }
 
-    public void updateSingleItem(List<T> newList,int changedPosition) {
+    public void updateSingleItem(List<T> newList, int changedPosition, Bundle payload) {
         updateInnerList(newList);
-        mAttachedAdapter.notifyItemChanged(changedPosition);
+        if(payload.isEmpty()) {
+            mAttachedAdapter.notifyItemChanged(changedPosition);
+        }else {
+            mAttachedAdapter.notifyItemChanged(changedPosition,payload);
+        }
+
     }
 
     public void updateInnerList(List<T> newList) {

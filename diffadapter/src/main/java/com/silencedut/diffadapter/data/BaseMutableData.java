@@ -1,6 +1,7 @@
 package com.silencedut.diffadapter.data;
 
 
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 
 import com.silencedut.diffadapter.IProvideItemId;
@@ -17,7 +18,7 @@ import java.util.Set;
 
 public abstract class BaseMutableData<T extends BaseMutableData> implements IProvideItemId {
     private Set<Object> mMathFeature = new HashSet<>();
-
+    private Bundle mPayloadBundle = new Bundle();
 
     /**
      * 通过一个列表里的数据独一无二的特征来判断是不是同一个Item，如uid，消息id等
@@ -35,7 +36,21 @@ public abstract class BaseMutableData<T extends BaseMutableData> implements IPro
      */
     public abstract boolean areUISame(@NonNull T data);
 
-    
+    /**
+     * payload 方式 更新item，可实现对单个Item的局部刷新
+     * @param newData 新数据
+     * @return 旧数据和新数据需要改变的部分，
+     */
+    public final @NonNull Bundle getDiffPayload(@NonNull T newData){
+        mPayloadBundle.clear();
+        appendDiffPayload(newData,mPayloadBundle);
+        return mPayloadBundle;
+    }
+
+    public void appendDiffPayload(@NonNull T newData,@NonNull Bundle diffPayloadBundle){
+
+    }
+
 
     /**
      * 提供一个或多个用来匹配列表中所有的需要变化的数据的特征，也就是找出数据中包含该mMathFeature里的特征的数据，
