@@ -1,5 +1,7 @@
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
 group='com.github.silencedut'
 
 android {
@@ -43,5 +45,9 @@ dependencies {
 
     compileOnly "com.android.support:appcompat-v7:$_supportVersion"
     compileOnly "com.android.support:recyclerview-v7:$_supportVersion"
-    implementation "android.arch.lifecycle:extensions:$lifecycle_extensions"
+    compileOnly "android.arch.lifecycle:extensions:$lifecycle_extensions"
+    compileOnly "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+}
+repositories {
+    mavenCentral()
 }
