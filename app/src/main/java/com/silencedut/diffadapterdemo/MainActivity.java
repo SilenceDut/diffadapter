@@ -9,9 +9,11 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.View;
 
 import com.silencedut.diffadapter.DiffAdapter;
 import com.silencedut.diffadapter.data.BaseMutableData;
+import com.silencedut.diffadapter.utils.ModelProvider;
 import com.silencedut.diffadapter.utils.UpdateFunction;
 
 import java.util.ArrayList;
@@ -37,6 +39,9 @@ public class MainActivity extends AppCompatActivity {
 
         final MutableLiveData<DataSource> changedImageSource = new MutableLiveData<>();
         ((DefaultItemAnimator) mRVTest.getItemAnimator()).setSupportsChangeAnimations(false);
+
+
+
         mDiffAdapter.addUpdateMediator(changedImageSource, new UpdateFunction<DataSource,ImageData>() {
             @Override
             public Object providerMatchFeature(@NonNull DataSource input) {
@@ -51,20 +56,16 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        final MutableLiveData<DataSource> changedTextSource = new MutableLiveData<>();
 
-        mDiffAdapter.addUpdateMediator(changedTextSource, new UpdateFunction<DataSource,TextData>() {
+        findViewById(R.id.test).setOnClickListener(new View.OnClickListener() {
             @Override
-            public Object providerMatchFeature(@NonNull DataSource input) {
-                return input.getUid();
-            }
-
-            @Override
-            public TextData applyChange(@NonNull DataSource input, @NonNull TextData originalData) {
-
-                return new TextData(originalData.getUid(),input.getContent(),originalData.getBackgroundColor());
+            public void onClick(View v) {
+                ModelProvider.getModel(MainActivity.this,DataChangeViewModel.class).getChangedTextSource()
+                        .setValue(new DataSource(4,R.drawable.ic_launcher_foreground,"time:"+System.currentTimeMillis()));
             }
         });
+
+        ModelProvider.getModel(this,DataChangeViewModel.class).addUpdateMediator(mDiffAdapter);
 
         final MutableLiveData<DataSource2> changedTextSource2 = new MutableLiveData<>();
         mDiffAdapter.addUpdateMediator(changedTextSource2, new UpdateFunction<DataSource2,TextData>() {
@@ -92,18 +93,18 @@ public class MainActivity extends AppCompatActivity {
 //            }
 //        },1500);
 
-        mRVTest.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                changedTextSource.setValue(new DataSource(uid,R.drawable.ic_launcher_foreground,"新的内容:"+uid*2));
-                mRVTest.postDelayed(this,1000);
-                uid ++;
-                if(uid > 7) {
-                    uid =0;
-                }
-
-            }
-        },1000);
+//        mRVTest.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                changedTextSource.setValue(new DataSource(uid,R.drawable.ic_launcher_foreground,"新的内容:"+uid*2));
+//                mRVTest.postDelayed(this,1000);
+//                uid ++;
+//                if(uid > 7) {
+//                    uid =0;
+//                }
+//
+//            }
+//        },1000);
 //
 //        mRVTest.postDelayed(new Runnable() {
 //            @Override

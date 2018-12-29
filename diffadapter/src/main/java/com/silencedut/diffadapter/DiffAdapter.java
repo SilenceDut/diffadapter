@@ -136,11 +136,25 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
                     }else {
                         return;
                     }
+
+                    Class clsType = null;
+                    if(neededDataType!=null) {
+                        if (neededDataType instanceof Class) {
+                            clsType = (Class) neededDataType;
+                        } else if (neededDataType instanceof ParameterizedType) {
+                            Type type = ((ParameterizedType) neededDataType).getRawType();
+                            if (type instanceof Class) {
+                                clsType = (Class) type;
+                            }
+                        }
+                    }
+
                     List<BaseMutableData> oldMatchedDatas;
                     if(UpdateFunction.MATCH_ALL.equals(matchFeature)) {
-                        oldMatchedDatas = getData(neededDataType);
+                        oldMatchedDatas = getData(clsType);
                     }else {
-                        oldMatchedDatas = getMatchedData(updateFunction.providerMatchFeature(dataSource), neededDataType);
+                        oldMatchedDatas = getMatchedData(matchFeature, clsType);
+
                     }
 
                     for(BaseMutableData oldData : oldMatchedDatas) {
@@ -326,10 +340,10 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
     }
 
 
-    private  <T extends BaseMutableData> List<T> getMatchedData(Object matchChangeFeature,Type type) {
+    private  <T extends BaseMutableData> List<T> getMatchedData(Object matchChangeFeature,Class cls) {
         List<T> matchedMutableData = new ArrayList<>();
         for(BaseMutableData baseMutableData : mData) {
-            if(baseMutableData!=null && baseMutableData.matchChangeFeatures().contains(matchChangeFeature) && type == baseMutableData.getClass() ) {
+            if(baseMutableData!=null && baseMutableData.matchChangeFeatures().contains(matchChangeFeature) && cls.isInstance(baseMutableData)) {
                 matchedMutableData.add((T)baseMutableData);
             }
         }
@@ -337,20 +351,11 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
 
     }
 
-    private  <T extends BaseMutableData> List<T> getData(Type type) {
-        List<T> typeLists = new ArrayList<>();
-        for(BaseMutableData baseMutableData : mData) {
-            if(type == baseMutableData.getClass()) {
-                typeLists.add((T) baseMutableData);
-            }
-        }
-        return typeLists;
-    }
 
     public <T extends BaseMutableData> List<T> getData(Class<T> tClass) {
         List<T> classLists = new ArrayList<>();
         for(BaseMutableData baseMutableData : mData) {
-            if(tClass == baseMutableData.getClass()) {
+            if(tClass.isInstance(tClass)) {
                 classLists.add((T) baseMutableData);
             }
         }
