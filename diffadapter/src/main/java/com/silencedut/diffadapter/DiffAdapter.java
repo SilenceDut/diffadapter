@@ -355,7 +355,7 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
     public <T extends BaseMutableData> List<T> getData(Class<T> tClass) {
         List<T> classLists = new ArrayList<>();
         for(BaseMutableData baseMutableData : mData) {
-            if(tClass.isInstance(tClass)) {
+            if(tClass.isInstance(baseMutableData)) {
                 classLists.add((T) baseMutableData);
             }
         }

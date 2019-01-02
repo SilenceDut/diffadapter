@@ -62,6 +62,10 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 ModelProvider.getModel(MainActivity.this,DataChangeViewModel.class).getChangedTextSource()
                         .setValue(new DataSource(4,R.drawable.ic_launcher_foreground,"time:"+System.currentTimeMillis()));
+                ModelProvider.getModel(MainActivity.this,DataChangeViewModel.class).getChangedTextSource()
+                        .setValue(new DataSource(5,R.drawable.ic_launcher_foreground,"time:"+System.currentTimeMillis()));
+                ModelProvider.getModel(MainActivity.this,DataChangeViewModel.class).getChangedTextSource()
+                        .setValue(new DataSource(6,R.drawable.ic_launcher_foreground,"time:"+System.currentTimeMillis()));
             }
         });
 
