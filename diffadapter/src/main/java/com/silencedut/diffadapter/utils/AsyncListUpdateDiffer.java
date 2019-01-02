@@ -129,13 +129,14 @@ public class AsyncListUpdateDiffer<T> {
         }
     }
 
-    void latchList(@NonNull List<T> newList, @NonNull DiffUtil.DiffResult diffResult) {
-        updateInnerList(newList);
+    private void latchList(@NonNull List<T> newList, @NonNull DiffUtil.DiffResult diffResult) {
+        this.mList = newList;
+        this.mReadOnlyList = Collections.unmodifiableList(newList);
         diffResult.dispatchUpdatesTo(this.mUpdateCallback);
     }
 
-    public void updateSingleItem(List<T> newList, int changedPosition, Bundle payload) {
-        updateInnerList(newList);
+    public void updateSingleItem(int changedPosition, Bundle payload) {
+
         if(payload.isEmpty()) {
             mAttachedAdapter.notifyItemChanged(changedPosition);
         }else {
@@ -144,10 +145,6 @@ public class AsyncListUpdateDiffer<T> {
 
     }
 
-    public void updateInnerList(List<T> newList) {
-        this.mList = newList;
-        this.mReadOnlyList = Collections.unmodifiableList(newList);
-    }
 
     private static class MainThreadExecutor implements Executor {
         final Handler mHandler = new Handler(Looper.getMainLooper());

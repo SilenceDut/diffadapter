@@ -47,7 +47,7 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
 
     private static final String TAG = "DiffAdapter";
     private SparseArray<Class<? extends BaseDiffViewHolder>> typeHolders = new SparseArray();
-    private List<BaseMutableData> mData = new ArrayList<>();
+    private List<BaseMutableData> mDatas = new ArrayList<>();
 
     private LayoutInflater mInflater;
     private LifecycleOwner mLifecycleOwner;
@@ -116,7 +116,7 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
             return;
         }
         typeHolders.put(data.get(0).getItemViewId(), viewHolder);
-        setData(data);
+        setDatas(data);
     }
 
     public <T> void  addUpdateMediator(LiveData<T> elementData, final UpdateFunction updateFunction) {
@@ -171,14 +171,14 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
     /**
      * @param datas 需要展示的数据,如果数据的每一项不是新new出来的，需要自行实现copyData来创建新的对象
      */
-    public void setData(List<? extends BaseMutableData> datas) {
-        mData.clear();
-        mData.addAll(datas);
+    public void setDatas(List<? extends BaseMutableData> datas) {
+        mDatas.clear();
+        mDatas.addAll(datas);
         doNotifyUI();
     }
 
     public void clear() {
-        mData.clear();
+        mDatas.clear();
         notifyDataSetChanged();
     }
 
@@ -186,9 +186,8 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
         if (data == null) {
             return;
         }
-        mData.add(data);
-        mDifferHelper.updateInnerList(mData);
-        notifyItemChanged(mData.size()-1);
+        mDatas.add(data);
+        doNotifyUI();
     }
 
 
@@ -200,9 +199,8 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
         if (datas == null) {
             return;
         }
-        mData.addAll(datas);
-        mDifferHelper.updateInnerList(mData);
-        notifyItemChanged(mData.size() - datas.size(),datas.size());
+        mDatas.addAll(datas);
+        doNotifyUI();
     }
 
 
@@ -210,59 +208,53 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
      * newData must a new created object
      * @return isFound and Update
      */
-    public boolean updateData(BaseMutableData newData) {
+    public void updateData(BaseMutableData newData) {
         if (newData == null ) {
-            return false;
+            return ;
         }
 
-        Iterator<BaseMutableData> iterator = mData.iterator();
+        Iterator<BaseMutableData> iterator = mDatas.iterator();
         int foundIndex = -1;
 
         while (iterator.hasNext()) {
             BaseMutableData data = iterator.next();
             foundIndex ++;
 
-            if(newData == data) {
-                // same instance change content
-                mDifferHelper.updateSingleItem(mData,foundIndex,data.getDiffPayload(newData));
-                return true;
-            } else if(data.getItemViewId() == newData.getItemViewId()
+          if(data.getItemViewId() == newData.getItemViewId()
                     && newData.uniqueItemFeature().equals(data.uniqueItemFeature()) ) {
-                // diff instance has same feature
-                iterator.remove();
-                mData.add(foundIndex,newData);
-                mDifferHelper.updateSingleItem(mData,foundIndex,data.getDiffPayload(newData));
-                return true;
+
+                mDatas.set(foundIndex,newData);
+
+                mDifferHelper.updateSingleItem(foundIndex,data.getDiffPayload(newData));
+
             }
         }
+        doNotifyUI();
 
-        return false;
     }
 
     public void deleteData(BaseMutableData data) {
         if (data == null) {
             return;
         }
-        Iterator<BaseMutableData> iterator = mData.iterator();
-        int position = -1;
+        Iterator<BaseMutableData> iterator = mDatas.iterator();
+
         while (iterator.hasNext()) {
-            position ++;
 
             if(data.uniqueItemFeature().equals(iterator.next().uniqueItemFeature())) {
                 iterator.remove();
-                mDifferHelper.updateInnerList(mData);
-                notifyItemRemoved(position);
                 break;
             }
         }
+        doNotifyUI();
 
     }
 
     public void deleteData(int startPosition, int size) {
-        if (startPosition > mData.size()) {
+        if (startPosition > mDatas.size()) {
             return;
         }
-        Iterator<BaseMutableData> iterator = mData.iterator();
+        Iterator<BaseMutableData> iterator = mDatas.iterator();
         int deleteSize =0;
         while (iterator.hasNext() && deleteSize < size) {
             iterator.next();
@@ -276,12 +268,12 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
         if (datas == null) {
             return;
         }
-        mData.addAll(startPosition,datas);
+        mDatas.addAll(startPosition,datas);
         notifyItemChanged(startPosition,datas.size());
     }
 
     private void doNotifyUI() {
-        List<BaseMutableData> newList = new ArrayList<>(mData);
+        List<BaseMutableData> newList = new ArrayList<>(mDatas);
         mDifferHelper.submitList(newList);
     }
 
@@ -342,7 +334,7 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
 
     private  <T extends BaseMutableData> List<T> getMatchedData(Object matchChangeFeature,Class cls) {
         List<T> matchedMutableData = new ArrayList<>();
-        for(BaseMutableData baseMutableData : mData) {
+        for(BaseMutableData baseMutableData : mDatas) {
             if(baseMutableData!=null && baseMutableData.matchChangeFeatures().contains(matchChangeFeature) && cls.isInstance(baseMutableData)) {
                 matchedMutableData.add((T)baseMutableData);
             }
@@ -354,7 +346,7 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
 
     public <T extends BaseMutableData> List<T> getData(Class<T> tClass) {
         List<T> classLists = new ArrayList<>();
-        for(BaseMutableData baseMutableData : mData) {
+        for(BaseMutableData baseMutableData : mDatas) {
             if(tClass.isInstance(baseMutableData)) {
                 classLists.add((T) baseMutableData);
             }
@@ -362,8 +354,8 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
         return classLists;
     }
 
-    public List<BaseMutableData> getData() {
-        return mData;
+    public List<BaseMutableData> getDatas() {
+        return mDatas;
     }
 
 

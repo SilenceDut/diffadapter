@@ -5,7 +5,6 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -13,6 +12,7 @@ import android.view.View;
 
 import com.silencedut.diffadapter.DiffAdapter;
 import com.silencedut.diffadapter.data.BaseMutableData;
+import com.silencedut.diffadapter.rvhelper.RvHelper;
 import com.silencedut.diffadapter.utils.ModelProvider;
 import com.silencedut.diffadapter.utils.UpdateFunction;
 
@@ -36,9 +36,35 @@ public class MainActivity extends AppCompatActivity {
         mRVTest.setLayoutManager(linearLayoutManager);
         mRVTest.setAdapter(mDiffAdapter);
         scheduleUpdate();
+        mRVTest.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                scheduleUpdate();
+                mRVTest.postDelayed(this,1000);
+
+            }
+        },1000);
+
+        mRVTest.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+
+                List<Long> uids = TestCode.Companion.getQueueUids();
+
+                for(int index =0 ;index <uids.size() ;index ++ ) {
+                    ModelProvider.getModel(MainActivity.this,DataChangeViewModel.class).getChangedTextSource().setValue(new DataSource(uids.get(index),R.drawable.ic_launcher_foreground,"ddd"));
+                }
+
+
+                mRVTest.postDelayed(this,800);
+
+            }
+        },800);
+
+
 
         final MutableLiveData<DataSource> changedImageSource = new MutableLiveData<>();
-        ((DefaultItemAnimator) mRVTest.getItemAnimator()).setSupportsChangeAnimations(false);
+        RvHelper.Companion.closeDefaultAnimator(mRVTest);
 
 
 
@@ -138,7 +164,14 @@ public class MainActivity extends AppCompatActivity {
 
 
         datas.add(new TextData(7,"7",Color.TRANSPARENT));
-        mDiffAdapter.setData(datas);
+
+        List<Long> uids = TestCode.Companion.getQueueUids();
+
+        for(int index =0 ;index <uids.size() ;index ++ ) {
+            datas.add(new TextData(uids.get(index),uids.get(index).toString(),Color.TRANSPARENT));
+        }
+
+        mDiffAdapter.setDatas(datas);
         Log.d("MainActivity","scheduleUpdate");
     }
 

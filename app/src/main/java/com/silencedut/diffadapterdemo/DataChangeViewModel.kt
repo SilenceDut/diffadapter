@@ -23,7 +23,7 @@ class DataChangeViewModel : ViewModel(){
 
             override fun applyChange(input: DataSource, originalData: BaseMutableData<*>): BaseMutableData<*> {
                 when(originalData) {
-                    is TextData ->  originalData.content = input.content
+                    is TextData ->  return TextData(originalData.uid,input.content,originalData.backgroundColor)
                 }
                 return originalData
             }
