@@ -60,9 +60,10 @@ public abstract class BaseDiffViewHolder<T extends BaseMutableData> extends Recy
 
     /**
      * if payload is not empty  , this method will be call rather than {@link #updateItem(T, int)}
+     * @param data
      * @param position
      */
-    public void updatePartWithPayload(int position, @NonNull Bundle payload){
+    public void updatePartWithPayload(T data, @NonNull Bundle payload, int position){
 
     }
 

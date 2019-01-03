@@ -33,7 +33,7 @@ class TextHolder(itemViewRoot: View, recyclerAdapter: DiffAdapter): BaseDiffView
         textView?.setBackgroundColor(data.backgroundColor)
     }
 
-    override fun updatePartWithPayload(position: Int, payload: Bundle) {
+    override fun updatePartWithPayload(data: TextData, payload: Bundle, position: Int) {
 
         Log.d(TAG,"position :"+position+"updatePartWithPayload payload content :"+payload.getString("content")+",backgroundColor : "+payload.getString("backgroundColor"))
         if(payload.getString("content")!=null) {
