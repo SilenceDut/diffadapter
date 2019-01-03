@@ -36,30 +36,30 @@ public class MainActivity extends AppCompatActivity {
         mRVTest.setLayoutManager(linearLayoutManager);
         mRVTest.setAdapter(mDiffAdapter);
         scheduleUpdate();
-        mRVTest.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                scheduleUpdate();
-                mRVTest.postDelayed(this,1000);
-
-            }
-        },1000);
-
-        mRVTest.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-
-                List<Long> uids = TestCode.Companion.getQueueUids();
-
-                for(int index =0 ;index <uids.size() ;index ++ ) {
-                    ModelProvider.getModel(MainActivity.this,DataChangeViewModel.class).getChangedTextSource().setValue(new DataSource(uids.get(index),R.drawable.ic_launcher_foreground,"ddd"));
-                }
-
-
-                mRVTest.postDelayed(this,800);
-
-            }
-        },800);
+////        mRVTest.postDelayed(new Runnable() {
+////            @Override
+////            public void run() {
+////                scheduleUpdate();
+////                mRVTest.postDelayed(this,1000);
+////
+////            }
+////        },1000);
+//
+//        mRVTest.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//
+//                List<Long> uids = TestCode.Companion.getQueueUids();
+//
+//                for(int index =0 ;index <uids.size() ;index ++ ) {
+//                    ModelProvider.getModel(MainActivity.this,DataChangeViewModel.class).getChangedTextSource().setValue(new DataSource(uids.get(index),R.drawable.ic_launcher_foreground,"ddd"));
+//                }
+//
+//
+//                mRVTest.postDelayed(this,800);
+//
+//            }
+//        },800);
 
 
 

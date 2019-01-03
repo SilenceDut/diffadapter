@@ -26,7 +26,7 @@ class ImageHolder( itemView: View, recyclerAdapter: DiffAdapter): BaseDiffViewHo
     }
 
     override fun updateItem(data: ImageData, position: Int) {
-        Log.d(TAG,"updateItem : "+context.resources.getResourceName(data.sourceId))
+        Log.d(TAG,"updatePartWithPayload : "+context.resources.getResourceName(data.sourceId))
 
 
         imageView?.setImageResource(data.sourceId)

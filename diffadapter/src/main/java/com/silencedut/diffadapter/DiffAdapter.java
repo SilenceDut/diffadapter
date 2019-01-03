@@ -187,7 +187,8 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
             return;
         }
         mDatas.add(data);
-        doNotifyUI();
+        mDifferHelper.updateInnerList(mDatas);
+        notifyItemChanged(mDatas.size()-1);
     }
 
 
@@ -200,7 +201,8 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
             return;
         }
         mDatas.addAll(datas);
-        doNotifyUI();
+        mDifferHelper.updateInnerList(mDatas);
+        notifyItemChanged(mDatas.size() - datas.size(),datas.size());
     }
 
 
@@ -229,7 +231,6 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
 
             }
         }
-        doNotifyUI();
 
     }
 
@@ -239,14 +240,17 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
         }
         Iterator<BaseMutableData> iterator = mDatas.iterator();
 
+        int position = -1;
         while (iterator.hasNext()) {
+            position ++;
 
             if(data.uniqueItemFeature().equals(iterator.next().uniqueItemFeature())) {
                 iterator.remove();
+                mDifferHelper.updateInnerList(mDatas);
+                notifyItemRemoved(position);
                 break;
             }
         }
-        doNotifyUI();
 
     }
 
@@ -303,7 +307,7 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
         try {
             baseDiffViewHolder.updateItem(mDifferHelper.getCurrentList().get(position), position);
         }catch (Exception e) {
-            Log.e(TAG,"onBindViewHolder updateItem error",e);
+            Log.e(TAG,"onBindViewHolder updatePartWithPayload error",e);
         }
     }
 
@@ -323,9 +327,9 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
             this.onBindViewHolder(holder,position);
         }else  {
             try {
-                holder.updateItem(mDifferHelper.getCurrentList().get(position), position,(Bundle) payloads.get(0));
+                holder.updatePartWithPayload(position,(Bundle) payloads.get(0));
             }catch (Exception e) {
-                Log.e(TAG,"onBindViewHolder updateItem payload error",e);
+                Log.e(TAG,"onBindViewHolder updatePartWithPayload payload error",e);
             }
         }
 

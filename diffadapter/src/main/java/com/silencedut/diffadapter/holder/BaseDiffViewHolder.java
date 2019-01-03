@@ -51,11 +51,19 @@ public abstract class BaseDiffViewHolder<T extends BaseMutableData> extends Recy
         setUIContext(mBaseAdapter.mContext);
     }
 
-
+    /**
+     * default update item way , which payload is empty
+     * @param data
+     * @param position
+     */
     public abstract void updateItem(@NonNull T data, int position);
 
-    public void updateItem(@NonNull T data, int position, @NonNull Bundle payload){
-        this.updateItem(data,position);
+    /**
+     * if payload is not empty  , this method will be call rather than {@link #updateItem(T, int)}
+     * @param position
+     */
+    public void updatePartWithPayload(int position, @NonNull Bundle payload){
+
     }
 
 

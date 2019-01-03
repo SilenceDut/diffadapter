@@ -1,5 +1,6 @@
 package com.silencedut.diffadapter.holder;
 
+import android.support.annotation.NonNull;
 import android.view.View;
 
 import com.silencedut.diffadapter.DiffAdapter;
@@ -16,7 +17,7 @@ public class NoDataDifferHolder extends BaseDiffViewHolder {
     }
 
     @Override
-    public void updateItem(BaseMutableData data, int position) {
+    public void updateItem(@NonNull BaseMutableData data, int position) {
 
     }
 

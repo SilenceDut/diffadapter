@@ -130,8 +130,7 @@ public class AsyncListUpdateDiffer<T> {
     }
 
     private void latchList(@NonNull List<T> newList, @NonNull DiffUtil.DiffResult diffResult) {
-        this.mList = newList;
-        this.mReadOnlyList = Collections.unmodifiableList(newList);
+        updateInnerList(newList);
         diffResult.dispatchUpdatesTo(this.mUpdateCallback);
     }
 
@@ -143,6 +142,12 @@ public class AsyncListUpdateDiffer<T> {
             mAttachedAdapter.notifyItemChanged(changedPosition,payload);
         }
 
+    }
+
+    public void updateInnerList(@NonNull List<T> newList){
+        ++this.mMaxScheduledGeneration;
+        this.mList = newList;
+        this.mReadOnlyList = Collections.unmodifiableList(newList);
     }
 
 
