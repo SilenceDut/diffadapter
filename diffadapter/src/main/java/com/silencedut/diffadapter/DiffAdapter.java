@@ -179,7 +179,7 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
 
     public void clear() {
         mDatas.clear();
-        notifyDataSetChanged();
+        doNotifyUI();
     }
 
     public <T extends BaseMutableData> void addData(T data) {

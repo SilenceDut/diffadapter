@@ -13,7 +13,7 @@ import android.view.View;
 import com.silencedut.diffadapter.DiffAdapter;
 import com.silencedut.diffadapter.IProvideItemId;
 import com.silencedut.diffadapter.data.BaseMutableData;
-import com.silencedut.diffadapter.utils.ModelProvider;
+import com.silencedut.diffadapter.utils.DiffModelProvider;
 
 /**
  *
@@ -73,9 +73,9 @@ public abstract class BaseDiffViewHolder<T extends BaseMutableData> extends Recy
      */
     public <V extends ViewModel> V getViewModel(Class<V> modelType){
         if(mBaseAdapter.attachedFragment == null || mBaseAdapter.attachedFragment.isDetached()) {
-            return  ModelProvider.getModel(mContext,modelType);
+            return  DiffModelProvider.getModel(mContext,modelType);
         }
-        return ModelProvider.getModel(getAttachedFragment(),modelType);
+        return DiffModelProvider.getModel(getAttachedFragment(),modelType);
     }
 
     @Nullable

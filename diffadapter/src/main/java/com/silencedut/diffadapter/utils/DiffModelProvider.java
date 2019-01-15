@@ -17,7 +17,7 @@ import android.util.Log;
  * @date 2018/9/6
  */
 
-public class ModelProvider {
+public class DiffModelProvider {
 
     private static final String TAG = "ModelProvider";
 
@@ -34,7 +34,7 @@ public class ModelProvider {
             throw new RuntimeException("getModel must call in mainThread");
         }
 
-        return ModelProvider.getModel(fragment,viewModel);
+        return ViewModelProviders.of(fragment).get(viewModel);
     }
 
     /**
