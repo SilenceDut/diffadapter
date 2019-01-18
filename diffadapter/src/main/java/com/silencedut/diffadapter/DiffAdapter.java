@@ -194,6 +194,7 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
             return;
         }
         mDatas.add(data);
+        mDifferHelper.updateOldList(mDatas);
         notifyItemChanged(mDatas.size()-1);
     }
 

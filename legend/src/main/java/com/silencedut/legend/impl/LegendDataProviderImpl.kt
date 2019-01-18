@@ -69,7 +69,7 @@ class LegendDataProviderImpl : ILegendDateProvider{
     }
 
     override fun fetchOneLegends(): Legend{
-        return Legend((0 until mLegendIds.size+1).random().toLong(),Type.values()[(0 until 2).random()])
+        return Legend((1 until mLegendIds.size+1).random().toLong(),Type.values()[(0 until 2).random()])
     }
 
     override fun baseLegendData(id: Long): LegendBaseInfo? {
