@@ -1,1 +1,1 @@
-include ':app', ':diffadapter'
+include ':app', ':diffadapter', ':legend', ':core'

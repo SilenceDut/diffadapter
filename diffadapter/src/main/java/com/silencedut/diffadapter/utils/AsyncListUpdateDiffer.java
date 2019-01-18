@@ -1,6 +1,5 @@
 package com.silencedut.diffadapter.utils;
 
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
@@ -10,8 +9,11 @@ import android.support.v7.util.AdapterListUpdateCallback;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.util.ListUpdateCallback;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 
-import java.util.Collections;
+import com.silencedut.diffadapter.data.BaseMutableData;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
 
@@ -20,50 +22,47 @@ import java.util.concurrent.Executor;
  * @author SilenceDut
  * @date 2018/12/19
  */
-public class AsyncListUpdateDiffer<T> {
+public class AsyncListUpdateDiffer<T extends BaseMutableData> {
+    private static final Executor DIFF_MAIN_EXECUTOR = new AsyncListUpdateDiffer.MainThreadExecutor();
     private final ListUpdateCallback mUpdateCallback;
-    final AsyncDifferConfig<T> mConfig;
-    final Executor mMainThreadExecutor;
-    private static final Executor sMainThreadExecutor = new AsyncListUpdateDiffer.MainThreadExecutor();
+    private final AsyncDifferConfig<T> mConfig;
+    private final ListChangedCallback<T> mListChangedCallback;
     @Nullable
     private List<T> mList;
-    @NonNull
-    private List<T> mReadOnlyList;
-    int mMaxScheduledGeneration;
-    private RecyclerView.Adapter mAttachedAdapter;
 
-    public AsyncListUpdateDiffer(@NonNull RecyclerView.Adapter adapter, @NonNull DiffUtil.ItemCallback<T> diffCallback) {
-        this(adapter,(new AdapterListUpdateCallback(adapter)),(new AsyncDifferConfig.Builder(diffCallback)).build());
-        this.mAttachedAdapter = adapter;
+    private List<T> mCurrentList ;
+    private int mMaxScheduledGeneration;
+
+
+    public AsyncListUpdateDiffer(@NonNull RecyclerView.Adapter adapter, @NonNull ListChangedCallback<T> listChangedCallback, @NonNull DiffUtil.ItemCallback<T> diffCallback) {
+
+        this.mUpdateCallback = new AdapterListUpdateCallback(adapter);
+        this.mConfig = new AsyncDifferConfig.Builder<>(diffCallback).build();
+        this.mListChangedCallback = listChangedCallback;
+        updateCurrentList(new ArrayList<T>());
     }
 
-    public AsyncListUpdateDiffer(@NonNull RecyclerView.Adapter adapter,@NonNull ListUpdateCallback listUpdateCallback, @NonNull AsyncDifferConfig<T> config) {
-        this.mAttachedAdapter = adapter;
-        this.mReadOnlyList = Collections.emptyList();
-        this.mUpdateCallback = listUpdateCallback;
-        this.mConfig = config;
-        this.mMainThreadExecutor = sMainThreadExecutor;
+    private void updateCurrentList(List<T> currentList) {
+        this.mCurrentList = currentList;
+        this.mListChangedCallback.onListChanged(mCurrentList);
     }
 
-    @NonNull
-    public List<T> getCurrentList() {
-        return this.mReadOnlyList;
-    }
 
     public void submitList(@Nullable final List<T> newList) {
         final int runGeneration = ++this.mMaxScheduledGeneration;
         if (newList != this.mList) {
             if (newList == null) {
                 int countRemoved = this.mList.size();
-                this.mList = null;
-                this.mReadOnlyList = Collections.emptyList();
+                updateOldList(null);
+                updateCurrentList(new ArrayList<T>());
                 this.mUpdateCallback.onRemoved(0, countRemoved);
             } else if (this.mList == null) {
-                this.mList = newList;
-                this.mReadOnlyList = Collections.unmodifiableList(newList);
+                updateOldList(newList);
+                updateCurrentList(new ArrayList<>(newList));
                 this.mUpdateCallback.onInserted(0, newList.size());
             } else {
                 final List<T> oldList = this.mList;
+                Log.d("AsyncListUpdateDiffer","start:"+this.mList.size() +","+newList.size()+","+mCurrentList.size());
                 this.mConfig.getBackgroundThreadExecutor().execute(new Runnable() {
                     @Override
                     public void run() {
@@ -82,7 +81,7 @@ public class AsyncListUpdateDiffer<T> {
                             public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
                                 T oldItem = oldList.get(oldItemPosition);
                                 T newItem = newList.get(newItemPosition);
-                                if (oldItem != null && newItem != null) {
+                                if (oldItem != null && newItem != null ) {
                                     return AsyncListUpdateDiffer.this.mConfig.getDiffCallback().areItemsTheSame(oldItem, newItem);
                                 } else {
                                     return oldItem == null && newItem == null;
@@ -93,7 +92,7 @@ public class AsyncListUpdateDiffer<T> {
                             public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
                                 T oldItem = oldList.get(oldItemPosition);
                                 T newItem = newList.get(newItemPosition);
-                                if (oldItem != null && newItem != null) {
+                                if (oldItem != null && newItem != null && oldItem.getClass() == newItem.getClass()) {
                                     return AsyncListUpdateDiffer.this.mConfig.getDiffCallback().areContentsTheSame(oldItem, newItem);
                                 } else if (oldItem == null && newItem == null) {
                                     return true;
@@ -114,11 +113,12 @@ public class AsyncListUpdateDiffer<T> {
                                 }
                             }
                         });
-                        AsyncListUpdateDiffer.this.mMainThreadExecutor.execute(new Runnable() {
+                        AsyncListUpdateDiffer.DIFF_MAIN_EXECUTOR.execute(new Runnable() {
                             @Override
                             public void run() {
                                 if (AsyncListUpdateDiffer.this.mMaxScheduledGeneration == runGeneration) {
                                     AsyncListUpdateDiffer.this.latchList(newList, result);
+                                    Log.d("AsyncListUpdateDiffer","end");
                                 }
 
                             }
@@ -130,24 +130,15 @@ public class AsyncListUpdateDiffer<T> {
     }
 
     private void latchList(@NonNull List<T> newList, @NonNull DiffUtil.DiffResult diffResult) {
-        updateInnerList(newList);
+
+        updateOldList(newList);
+        updateCurrentList(new ArrayList<>(newList));
         diffResult.dispatchUpdatesTo(this.mUpdateCallback);
-    }
-
-    public void updateSingleItem(int changedPosition, Bundle payload) {
-
-        if(payload.isEmpty()) {
-            mAttachedAdapter.notifyItemChanged(changedPosition);
-        }else {
-            mAttachedAdapter.notifyItemChanged(changedPosition,payload);
-        }
 
     }
 
-    public void updateInnerList(@NonNull List<T> newList){
-        ++this.mMaxScheduledGeneration;
+    public void updateOldList(@Nullable List<T> newList) {
         this.mList = newList;
-        this.mReadOnlyList = Collections.unmodifiableList(newList);
     }
 
 

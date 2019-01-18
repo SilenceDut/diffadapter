@@ -22,6 +22,7 @@ import com.silencedut.diffadapter.data.BaseMutableData;
 import com.silencedut.diffadapter.holder.BaseDiffViewHolder;
 import com.silencedut.diffadapter.holder.NoDataDifferHolder;
 import com.silencedut.diffadapter.utils.AsyncListUpdateDiffer;
+import com.silencedut.diffadapter.utils.ListChangedCallback;
 import com.silencedut.diffadapter.utils.UpdateFunction;
 
 import java.lang.reflect.Constructor;
@@ -41,13 +42,13 @@ import java.util.List;
  * When working with recycling views (ListView or RecyclerView), you cannot know what item a view is representing. In your case, that view gets recycled before the async work is done and is assigned to a different item of your data.
  * So never modify the view. Always modify the data and notify the adapter. bindView should be the place where you treat these cases.
  *
- * 异步数据结果回来不应该直接改变view的状态，而是应该改变数据，让数据驱动view改变
+ * 异步数据结果回来不应该直接改变view的状态，而是应该改变数据，然后通过adapter来改变View
  */
 public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
 
     private static final String TAG = "DiffAdapter";
     private SparseArray<Class<? extends BaseDiffViewHolder>> typeHolders = new SparseArray();
-    private List<BaseMutableData> mDatas = new ArrayList<>();
+    private List<BaseMutableData> mDatas ;
 
     private LayoutInflater mInflater;
     private LifecycleOwner mLifecycleOwner;
@@ -56,7 +57,7 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
 
     public Fragment attachedFragment;
     public Context mContext;
-
+    
 
     @SuppressWarnings("unchecked")
     public DiffAdapter(FragmentActivity appCompatActivity) {
@@ -70,11 +71,15 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
             }
         });
 
-        mDifferHelper = new AsyncListUpdateDiffer(this, new DiffUtil.ItemCallback<BaseMutableData>() {
+        mDifferHelper = new AsyncListUpdateDiffer(this, new ListChangedCallback() {
+            @Override
+            public void onListChanged(List currentList) {
+                mDatas = currentList;
+            }
+        }, new DiffUtil.ItemCallback<BaseMutableData>() {
             @Override
             public boolean areItemsTheSame(@NonNull BaseMutableData oldItem, @NonNull BaseMutableData newItem) {
-                return oldItem.getItemViewId() == newItem.getItemViewId()
-                        && oldItem.uniqueItemFeature().equals(newItem.uniqueItemFeature());
+                return oldItem.getItemViewId() == newItem.getItemViewId() && oldItem.uniqueItemFeature().equals(newItem.uniqueItemFeature());
 
             }
 
@@ -172,14 +177,16 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
      * @param datas 需要展示的数据,如果数据的每一项不是新new出来的，需要自行实现copyData来创建新的对象
      */
     public void setDatas(List<? extends BaseMutableData> datas) {
-        mDatas.clear();
-        mDatas.addAll(datas);
-        doNotifyUI();
+
+        List<BaseMutableData> newList = new ArrayList<>(datas);
+        mDifferHelper.submitList(newList);
+
     }
 
     public void clear() {
         mDatas.clear();
-        doNotifyUI();
+        List<BaseMutableData> newList = new ArrayList<>(mDatas);
+        mDifferHelper.submitList(newList);
     }
 
     public <T extends BaseMutableData> void addData(T data) {
@@ -187,52 +194,9 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
             return;
         }
         mDatas.add(data);
-        mDifferHelper.updateInnerList(mDatas);
         notifyItemChanged(mDatas.size()-1);
     }
 
-
-    /**
-     * 默认列表里的对象都是新new出来的
-     * @param datas 数据
-     */
-    public <T extends BaseMutableData> void addData(List<T> datas) {
-        if (datas == null) {
-            return;
-        }
-        mDatas.addAll(datas);
-        mDifferHelper.updateInnerList(mDatas);
-        notifyItemChanged(mDatas.size() - datas.size(),datas.size());
-    }
-
-
-    /**
-     * newData must a new created object
-     * @return isFound and Update
-     */
-    public void updateData(BaseMutableData newData) {
-        if (newData == null ) {
-            return ;
-        }
-
-        Iterator<BaseMutableData> iterator = mDatas.iterator();
-        int foundIndex = -1;
-
-        while (iterator.hasNext()) {
-            BaseMutableData data = iterator.next();
-            foundIndex ++;
-
-          if(data.getItemViewId() == newData.getItemViewId()
-                    && newData.uniqueItemFeature().equals(data.uniqueItemFeature()) ) {
-
-                mDatas.set(foundIndex,newData);
-
-                mDifferHelper.updateSingleItem(foundIndex,data.getDiffPayload(newData));
-
-            }
-        }
-
-    }
 
     public void deleteData(BaseMutableData data) {
         if (data == null) {
@@ -246,7 +210,7 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
 
             if(data.uniqueItemFeature().equals(iterator.next().uniqueItemFeature())) {
                 iterator.remove();
-                mDifferHelper.updateInnerList(mDatas);
+                mDifferHelper.updateOldList(mDatas);
                 notifyItemRemoved(position);
                 break;
             }
@@ -255,32 +219,71 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
     }
 
     public void deleteData(int startPosition, int size) {
-        if (startPosition > mDatas.size()) {
+        if (startPosition + size >= mDatas.size()) {
             return;
         }
+
         Iterator<BaseMutableData> iterator = mDatas.iterator();
         int deleteSize =0;
+        int startIndex =0;
+        while (startIndex < startPosition && iterator.hasNext() ) {
+            startIndex++;
+            iterator.next();
+        }
         while (iterator.hasNext() && deleteSize < size) {
             iterator.next();
             iterator.remove();
             deleteSize++;
         }
-        notifyItemRangeRemoved(startPosition,size);
+
+        mDifferHelper.updateOldList(mDatas);
+        notifyItemRangeRemoved(startPosition,deleteSize);
     }
 
     public void insertData(int startPosition ,List<? extends BaseMutableData> datas) {
-        if (datas == null) {
+        if (datas == null || datas.isEmpty()) {
             return;
         }
         mDatas.addAll(startPosition,datas);
-        notifyItemChanged(startPosition,datas.size());
+        mDifferHelper.updateOldList(mDatas);
+
+        notifyItemRangeInserted(startPosition,datas.size());
     }
 
-    private void doNotifyUI() {
-        List<BaseMutableData> newList = new ArrayList<>(mDatas);
-        mDifferHelper.submitList(newList);
-    }
 
+    public void updateData(BaseMutableData newData) {
+        if (newData == null ) {
+            return ;
+        }
+
+        Iterator<BaseMutableData> iterator = mDatas.iterator();
+        int foundIndex = -1;
+
+        while (iterator.hasNext()) {
+            BaseMutableData data = iterator.next();
+            foundIndex ++;
+
+            if(data.getItemViewId() == newData.getItemViewId()
+                    && newData.uniqueItemFeature().equals(data.uniqueItemFeature()) ) {
+
+                mDatas.set(foundIndex,newData);
+
+                if(mDatas.size() > foundIndex) {
+
+                    Bundle payload = data.getDiffPayload(newData);
+
+                    if(payload.isEmpty()) {
+                        Log.d(TAG,"notifyItemChanged :"+foundIndex+"isEmpty");
+                        notifyItemChanged(foundIndex);
+                    }else {
+                        Log.d(TAG,"notifyItemChanged :"+foundIndex+",size:"+payload);
+                        notifyItemChanged(foundIndex,payload);
+                    }
+                }
+
+            }
+        }
+    }
 
 
     @NonNull
@@ -305,7 +308,7 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
     public void onBindViewHolder(@NonNull BaseDiffViewHolder baseDiffViewHolder, int position) {
 
         try {
-            baseDiffViewHolder.updateItem(mDifferHelper.getCurrentList().get(position), position);
+            baseDiffViewHolder.updateItem(mDatas.get(position), position);
         }catch (Exception e) {
             Log.e(TAG,"onBindViewHolder updatePartWithPayload error",e);
         }
@@ -315,7 +318,7 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull BaseDiffViewHolder holder, int position, @NonNull List<Object> payloads) {
 
-        if (mDifferHelper.getCurrentList().size() == 0 || mDifferHelper.getCurrentList().get(position)==null) {
+        if (mDatas.size() == 0 || mDatas.get(position)==null) {
             return;
         }
 
@@ -323,11 +326,17 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
             return;
         }
 
-        if (payloads.isEmpty()) {
+        if (payloads.isEmpty() ) {
             this.onBindViewHolder(holder,position);
-        }else  {
+        }else {
             try {
-                holder.updatePartWithPayload(mDifferHelper.getCurrentList().get(position), (Bundle) payloads.get(0), position);
+                Bundle diffPayloads = new Bundle();
+                for(Object payload:payloads) {
+                    if(payload instanceof Bundle) {
+                        diffPayloads.putAll((Bundle) payload);
+                    }
+                }
+                holder.updatePartWithPayload(mDatas.get(position),diffPayloads, position);
             }catch (Exception e) {
                 Log.e(TAG,"onBindViewHolder updatePartWithPayload payload error",e);
             }
@@ -365,12 +374,12 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
 
     @Override
     public int getItemCount() {
-        return mDifferHelper.getCurrentList().size();
+        return mDatas.size();
     }
 
     @Override
     public int getItemViewType(int position) {
-        return mDifferHelper.getCurrentList().get(position).getItemViewId();
+        return mDatas.get(position).getItemViewId();
     }
 
 }

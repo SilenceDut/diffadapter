@@ -5,26 +5,108 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorAccent"
-    tools:context=".MainActivity">
+    >
 
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rv_test"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/fetch_data"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
 
         />
 
-    <ImageView
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:src="@mipmap/ic_launcher"
-        android:id="@+id/test"
+    <TextView
+        android:id="@+id/fetch_data"
+        app:layout_constraintHorizontal_chainStyle="spread"
+        app:layout_constraintBottom_toTopOf="@+id/random_insert"
+        app:layout_constraintTop_toBottomOf="@+id/rv_test"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@+id/random_update"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:layout_marginBottom="5dp"
+        android:text="拉取列表"
+        android:textColor="#fff"
+        android:background="#5f6fff"
+        />
+
+    <TextView
+        android:id="@+id/random_update"
+        app:layout_constraintBottom_toTopOf="@+id/random_insert"
+        app:layout_constraintTop_toBottomOf="@+id/rv_test"
+        app:layout_constraintLeft_toRightOf="@+id/fetch_data"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:layout_marginBottom="5dp"
+        android:text="动态实时更新数据"
+        android:textColor="#fff"
+        android:background="#5f6fff"
+        />
+
+
+    <TextView
+        android:id="@+id/random_add"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_chainStyle="spread"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@+id/random_insert"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:text="添加单个"
+        android:textColor="#fff"
+        android:background="#5f6fff"
+        />
+
+    <TextView
+        android:id="@+id/random_insert"
+        app:layout_constraintBottom_toBottomOf="parent"
+
+        app:layout_constraintLeft_toRightOf="@+id/random_add"
+        app:layout_constraintRight_toLeftOf="@+id/random_delete_many"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:text="插入多个"
+        android:textColor="#fff"
+        android:background="#5f6fff"
+        />
+
+
+    <TextView
+        android:id="@+id/random_delete_many"
+        app:layout_constraintBottom_toBottomOf="parent"
+
+        app:layout_constraintLeft_toRightOf="@+id/random_insert"
+        app:layout_constraintRight_toLeftOf="@+id/random_delete_one"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:text="删除多个"
+        android:textColor="#fff"
+
+        android:background="#5f6fff"
+        />
+
+    <TextView
+        android:id="@+id/random_delete_one"
+        app:layout_constraintBottom_toBottomOf="parent"
+
+        app:layout_constraintLeft_toRightOf="@+id/random_delete_many"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:text="删除一个"
+        android:textColor="#fff"
+        android:background="#5f6fff"
         />
 
 

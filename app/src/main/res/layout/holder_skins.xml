@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <ImageView
+        android:id="@+id/legendIcon_iv"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@+id/skins1_iv"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:scaleType="fitXY"
+        app:layout_constraintDimensionRatio="4:3"/>
+
+    <ImageView
+        android:id="@+id/skins1_iv"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintDimensionRatio="4:3"
+        android:layout_height="0dp"
+        android:layout_width="0dp"
+        android:scaleType="fitXY"
+        android:layout_marginLeft="3dp"
+        app:layout_constraintLeft_toRightOf="@+id/legendIcon_iv"
+        app:layout_constraintRight_toLeftOf="@+id/skins2_iv"
+        />
+
+    <ImageView
+        android:id="@+id/skins2_iv"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintDimensionRatio="4:3"
+        android:layout_marginLeft="3dp"
+        android:layout_height="0dp"
+        android:layout_width="0dp"
+        app:layout_constraintLeft_toRightOf="@+id/skins1_iv"
+        app:layout_constraintRight_toRightOf="parent"
+        android:scaleType="fitXY"
+        />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:background="#f5f5f5"
+        />
+
+
+</android.support.constraint.ConstraintLayout>
