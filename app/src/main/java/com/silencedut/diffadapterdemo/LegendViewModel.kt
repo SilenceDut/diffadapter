@@ -42,6 +42,10 @@ class LegendViewModel: ViewModel(), LegendNotification.LegendInfo, LegendNotific
         Transfer.getImpl(ILegendDateProvider::class.java).fetchLegends()
     }
 
+    fun legendsDataChanged() {
+        Transfer.getImpl(ILegendDateProvider::class.java).legendsDataChanged()
+    }
+
     override fun onLegendsFetched(ids: List<Legend>) {
         legendsData.value = ids.map {
             convertToAdapterData(it)

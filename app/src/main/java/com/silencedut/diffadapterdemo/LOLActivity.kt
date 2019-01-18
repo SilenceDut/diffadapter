@@ -50,13 +50,13 @@ class LOLActivity : AppCompatActivity(){
             diffAdapter.datas = it
         })
 
-        findViewById<View>(R.id.fetch_data).setOnClickListener{
+        findViewById<View>(R.id.fetch_data).setOnClickListener {
             legendViewModel.fetchLegends()
         }
 
         findViewById<View>(R.id.random_update).setOnClickListener { _ ->
             verify(diffAdapter)?.let {
-                legendViewModel.fetchLegends()
+                legendViewModel.legendsDataChanged()
             }
 
         }

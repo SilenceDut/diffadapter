@@ -22,6 +22,7 @@ interface ILegendDateProvider:IHub{
      */
     fun fetchOneLegends(): Legend
 
+    fun legendsDataChanged()
 
     /**
      * 通过id获取数据，如果有缓存直接返回，否则返回空，同时模拟获取数据

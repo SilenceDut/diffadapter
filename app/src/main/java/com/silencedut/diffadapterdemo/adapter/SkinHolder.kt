@@ -39,7 +39,7 @@ class SkinHolder(itemView: View, recyclerAdapter: DiffAdapter): BaseDiffViewHold
         data.legendSkin?.let {
             when(it.skins.size) {
                 1 ->  Picasso.get().load(it.skins[0]).into(legendIcon)
-                2 ->  {
+                2 ,3,4->  {
                     Picasso.get().load(it.skins[0]).into(legendSkin1)
                     Picasso.get().load(it.skins[1]).into(legendSkin2)
                 }

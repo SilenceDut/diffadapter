@@ -19,7 +19,6 @@ import kotlin.collections.HashMap
 @HubInject(api = [ILegendDateProvider::class])
 class LegendDataProviderImpl : ILegendDateProvider{
 
-
     companion object {
         const val TAG = "LegendDataProviderImpl"
     }
@@ -40,16 +39,25 @@ class LegendDataProviderImpl : ILegendDateProvider{
             ,DataObject3(8L,"德玛西亚之力 盖伦","https://ossweb-img.qq.com/images/lol/web201310/skin/big86000.jpg")
             ,DataObject3(9L,"暴走萝莉 金克丝","https://ossweb-img.qq.com/images/lol/web201310/skin/big222000.jpg")
             ,DataObject3(10L,"戏命师 烬","https://ossweb-img.qq.com/images/lol/web201310/skin/big202000.jpg"))
-    private val mSkinServer = arrayListOf(DataObject2(1L, arrayOf("https://ossweb-img.qq.com/images/lol/web201310/skin/big266008.jpg","https://ossweb-img.qq.com/images/lol/web201310/skin/big266003.jpg"))
-            ,DataObject2(2L, arrayOf("https://ossweb-img.qq.com/images/lol/web201310/skin/big103015.jpg","https://ossweb-img.qq.com/images/lol/web201310/skin/big103014.jpg"))
-            ,DataObject2(3L, arrayOf("https://ossweb-img.qq.com/images/lol/web201310/skin/big84009.jpg","https://ossweb-img.qq.com/images/lol/web201310/skin/big84005.jpg"))
-            ,DataObject2(4L, arrayOf("https://ossweb-img.qq.com/images/lol/web201310/skin/big122015.jpg","https://ossweb-img.qq.com/images/lol/web201310/skin/big122008.jpg"))
-            ,DataObject2(5L, arrayOf("https://ossweb-img.qq.com/images/lol/web201310/skin/big41003.jpg","https://ossweb-img.qq.com/images/lol/web201310/skin/big41008.jpg"))
-            ,DataObject2(6L, arrayOf("https://ossweb-img.qq.com/images/lol/web201310/skin/big24013.jpg","https://ossweb-img.qq.com/images/lol/web201310/skin/big24007.jpg"))
+    private val mSkinServer = arrayListOf(DataObject2(1L, arrayOf("https://ossweb-img.qq.com/images/lol/web201310/skin/big266008.jpg", "https://ossweb-img.qq.com/images/lol/web201310/skin/big266003.jpg"
+            ,"https://ossweb-img.qq.com/images/lol/web201310/skin/big266001.jpg","https://ossweb-img.qq.com/images/lol/web201310/skin/big266002.jpg"))
+            ,DataObject2(2L, arrayOf("https://ossweb-img.qq.com/images/lol/web201310/skin/big103015.jpg","https://ossweb-img.qq.com/images/lol/web201310/skin/big103014.jpg"
+            ,"https://ossweb-img.qq.com/images/lol/web201310/skin/big103007.jpg","https://ossweb-img.qq.com/images/lol/web201310/skin/big103005.jpg"))
+            ,DataObject2(3L, arrayOf("https://ossweb-img.qq.com/images/lol/web201310/skin/big84009.jpg","https://ossweb-img.qq.com/images/lol/web201310/skin/big84005.jpg"
+            ,"https://ossweb-img.qq.com/images/lol/web201310/skin/big84003.jpg","https://ossweb-img.qq.com/images/lol/web201310/skin/big84004.jpg"))
+            ,DataObject2(4L, arrayOf("https://ossweb-img.qq.com/images/lol/web201310/skin/big122015.jpg","https://ossweb-img.qq.com/images/lol/web201310/skin/big122008.jpg"
+            ,"https://ossweb-img.qq.com/images/lol/web201310/skin/big122001.jpg","https://ossweb-img.qq.com/images/lol/web201310/skin/big122004.jpg"))
+            ,DataObject2(5L, arrayOf("https://ossweb-img.qq.com/images/lol/web201310/skin/big41003.jpg","https://ossweb-img.qq.com/images/lol/web201310/skin/big41008.jpg"
+            ,"https://ossweb-img.qq.com/images/lol/web201310/skin/big41005.jpg","https://ossweb-img.qq.com/images/lol/web201310/skin/big41002.jpg"))
+            ,DataObject2(6L, arrayOf("https://ossweb-img.qq.com/images/lol/web201310/skin/big24013.jpg","https://ossweb-img.qq.com/images/lol/web201310/skin/big24007.jpg"
+            ,"https://ossweb-img.qq.com/images/lol/web201310/skin/big24008.jpg","https://ossweb-img.qq.com/images/lol/web201310/skin/big24012.jpg"))
             ,DataObject2(7L, arrayOf("https://ossweb-img.qq.com/images/lol/web201310/skin/big164001.jpg","https://ossweb-img.qq.com/images/lol/web201310/skin/big164002.jpg"))
-            ,DataObject2(8L, arrayOf("https://ossweb-img.qq.com/images/lol/web201310/skin/big86013.jpg","https://ossweb-img.qq.com/images/lol/web201310/skin/big86005.jpg"))
-            ,DataObject2(9L, arrayOf("https://ossweb-img.qq.com/images/lol/web201310/skin/big222004.jpg","https://ossweb-img.qq.com/images/lol/web201310/skin/big222002.jpg"))
-            ,DataObject2(10L, arrayOf("https://ossweb-img.qq.com/images/lol/web201310/skin/big202002.jpg","https://ossweb-img.qq.com/images/lol/web201310/skin/big202004.jpg")))
+            ,DataObject2(8L, arrayOf("https://ossweb-img.qq.com/images/lol/web201310/skin/big86013.jpg","https://ossweb-img.qq.com/images/lol/web201310/skin/big86005.jpg"
+            ,"https://ossweb-img.qq.com/images/lol/web201310/skin/big86002.jpg","https://ossweb-img.qq.com/images/lol/web201310/skin/big86011.jpg"))
+            ,DataObject2(9L, arrayOf("https://ossweb-img.qq.com/images/lol/web201310/skin/big222004.jpg","https://ossweb-img.qq.com/images/lol/web201310/skin/big222002.jpg"
+            ,"https://ossweb-img.qq.com/images/lol/web201310/skin/big222012.jpg"))
+            ,DataObject2(10L, arrayOf("https://ossweb-img.qq.com/images/lol/web201310/skin/big202002.jpg","https://ossweb-img.qq.com/images/lol/web201310/skin/big202004.jpg"
+            ,"https://ossweb-img.qq.com/images/lol/web201310/skin/big202001.jpg")))
 
     //模拟从服务器异步获取数据
     private val mServerHandler = TaskScheduler.provideHandler("LegendServer")
@@ -60,8 +68,8 @@ class LegendDataProviderImpl : ILegendDateProvider{
 
     override fun fetchLegends() {
 
-        val startIndex = (0 until mLegendIds.size-1).random()
-        val resultIds = mLegendIds.subList(startIndex,(startIndex+1 until mLegendIds.size+1).random())
+        val startIndex = (0 until mLegendIds.size-5).random()
+        val resultIds = mLegendIds.subList(startIndex,(startIndex+5 until mLegendIds.size+1).random())
         Log.d(TAG,"fetchLegends $resultIds")
         Transfer.getSubscriber(LegendNotification.LegendsList::class.java).onLegendsFetched(resultIds.map {
             Legend(it,Type.values()[(0 until 2).random()])
@@ -71,6 +79,28 @@ class LegendDataProviderImpl : ILegendDateProvider{
     override fun fetchOneLegends(): Legend{
         return Legend((1 until mLegendIds.size+1).random().toLong(),Type.values()[(0 until 2).random()])
     }
+
+    override fun legendsDataChanged() {
+        val startIndex = (0 until mLegendIds.size-1).random()
+        val resultIds = mLegendIds.subList(startIndex,(startIndex+1 until mLegendIds.size+1).random())
+        resultIds.forEach {
+            mLegendsBaseInfoById[it]?.let { _info ->
+                _info.name = _info.name.reversed()
+                Transfer.getSubscriber(LegendNotification.LegendInfo::class.java).onLegendBaseInfoFetched(_info)
+            }
+            val legendPrice = LegendPrice(it,(30 until 100).random().toLong())
+            Transfer.getSubscriber(LegendNotification.LegendInfo::class.java).onLegendPriceFetched(legendPrice)
+
+            mLegendsSkinsById[it]?.let {_skins ->
+
+                _skins.skins = _skins.skins.reversedArray()
+                Transfer.getSubscriber(LegendNotification.LegendInfo::class.java).onLegendSkinsFetched(_skins)
+            }
+
+        }
+    }
+
+
 
     override fun baseLegendData(id: Long): LegendBaseInfo? {
         if(!mLegendsBaseInfoById.containsKey(id)) {
@@ -91,7 +121,7 @@ class LegendDataProviderImpl : ILegendDateProvider{
     override fun legendPrice(id: Long): LegendPrice? {
         if(!mLegendsPriceById.containsKey(id)) {
             mServerHandler.postDelayed({
-                val legendPrice = LegendPrice(id,(30L until 100L).random())
+                val legendPrice = LegendPrice(id,(30 until 100).random().toLong())
                 mLegendsPriceById[id] = legendPrice
                 Transfer.getSubscriber(LegendNotification.LegendInfo::class.java).onLegendPriceFetched(legendPrice)
             },500L)
