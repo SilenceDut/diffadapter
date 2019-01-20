@@ -30,9 +30,7 @@ dependencies {
     api "com.android.support:recyclerview-v7:$_supportVersion"
     api "android.arch.lifecycle:extensions:$lifecycle_extensions"
     api "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    //Android 工程使用
-    api "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlin_coroutines"
-    api "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlin_coroutines"
+
 
     api "com.silencedut:router:$router"
     api "com.github.silencedut.hub:hub:$hub_version"
