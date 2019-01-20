@@ -3,12 +3,12 @@ buildscript {
     ext {
         //android
         _compileSdkVersion = 28
-        _targetSdkVersion = 27
+        _targetSdkVersion = 28
         _supportVersion = '28.0.0'
-        _minSdkVersion = 16
+        _minSdkVersion = 14
         _versionCode = System.getenv("BUILD_NUMBER") as Integer ?: 1
         lifecycle_extensions = '1.1.1'
-        kotlin_version = '1.2.71'
+        kotlin_version = '1.3.11'
         kotlin_coroutines = '1.0.1'
         hub_version = '2.3.0'
         router = '1.3.0'
