@@ -173,14 +173,11 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
     }
 
 
-    /**
-     * @param datas 需要展示的数据,如果数据的每一项不是新new出来的，需要自行实现copyData来创建新的对象
-     */
+
     public void setDatas(List<? extends BaseMutableData> datas) {
 
         List<BaseMutableData> newList = new ArrayList<>(datas);
         mDifferHelper.submitList(newList);
-
     }
 
     public void clear() {

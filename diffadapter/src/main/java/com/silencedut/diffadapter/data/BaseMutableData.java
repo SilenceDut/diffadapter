@@ -30,7 +30,7 @@ public abstract class BaseMutableData<T extends BaseMutableData> implements IPro
     public abstract Object uniqueItemFeature();
 
     /**
-     * 判断新旧数据对UI是否影响
+     * 判断新旧数据对UI是否影响, 仅当新旧数据的uniqueItemFeature相同时才会进行 {@link #areUISame( T)}的判断
      * @param data 需要对比的数据
      * @return 是否需要跟新UI
      */
