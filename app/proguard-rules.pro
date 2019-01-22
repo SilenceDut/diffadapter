@@ -20,7 +20,10 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
+
 -keep class * extends com.silencedut.diffadapter.holder.BaseDiffViewHolder {*;}
+-keep class * extends com.silencedut.diffadapter.data.BaseMutableData {*;}
+
 -keep class * implements com.silencedut.hub_annotation.IFindImplClz {*;}
 -keep class * implements com.silencedut.hub_annotation.IFindActivity {*;}
 -keepnames interface * extends com.silencedut.hub.IHub
