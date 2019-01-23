@@ -124,10 +124,10 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
         setDatas(data);
     }
 
-    public <T> void  addUpdateMediator(LiveData<T> elementData, final UpdateFunction updateFunction) {
-        mUpdateMediatorLiveData.addSource(elementData, new Observer<T>() {
+    public <I ,R extends BaseMutableData> void  addUpdateMediator(LiveData<I> elementData, final UpdateFunction<I,R> updateFunction) {
+        mUpdateMediatorLiveData.addSource(elementData, new Observer<I>() {
             @Override
-            public void onChanged(@Nullable T dataSource) {
+            public void onChanged(@Nullable I dataSource) {
 
                 if(dataSource!=null) {
 
@@ -154,7 +154,7 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
                         }
                     }
 
-                    List<BaseMutableData> oldMatchedDatas;
+                    List<R> oldMatchedDatas;
                     if(UpdateFunction.MATCH_ALL.equals(matchFeature)) {
                         oldMatchedDatas = getData(clsType);
                     }else {
@@ -162,9 +162,9 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
 
                     }
 
-                    for(BaseMutableData oldData : oldMatchedDatas) {
+                    for(R oldData : oldMatchedDatas) {
                         if(oldData != null ) {
-                            updateData(updateFunction.applyChange(dataSource,oldData));
+                            updateData(updateFunction.applyChange(dataSource,  oldData));
                         }
                     }
                 }
@@ -324,7 +324,7 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
             return;
         }
 
-        if (payloads.isEmpty() ) {
+        if (payloads.isEmpty()) {
             this.onBindViewHolder(holder,position);
         }else {
             try {

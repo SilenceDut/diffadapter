@@ -94,8 +94,6 @@ class LOLActivity : AppCompatActivity(){
            
         }
 
-
-
         //如果更新很频繁，关闭动画能极大提高UI性能
         RvHelper.closeDefaultAnimator(mRVTest!!)
 

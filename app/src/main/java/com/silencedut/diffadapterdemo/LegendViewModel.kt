@@ -78,7 +78,6 @@ class LegendViewModel: ViewModel(), LegendNotification.LegendInfo, LegendNotific
                         originalData
                     }
                 }
-
             }
         })
 

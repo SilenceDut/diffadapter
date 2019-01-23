@@ -19,10 +19,11 @@ class SkinViewData(var id: Long, var legendIcon:String?,var legendSkin: LegendSk
     }
 
 
-    //可以用来添加更多的匹配规则,默认以uniqueItemFeature作为匹配规则
+    //可以用来添加更多的匹配规则,默认以uniqueItemFeature作为匹配规则，默认是uniqueItemFeature()
     override fun appendMatchFeature(allMatchFeatures: MutableSet<Any>) {
         super.appendMatchFeature(allMatchFeatures)
-        allMatchFeatures.add(id)
+        legendIcon?.let { allMatchFeatures.add(it) }
+
     }
 
     override fun areUISame(newData: SkinViewData): Boolean {

@@ -112,7 +112,7 @@ class LegendDataProviderImpl : ILegendDateProvider{
                         Transfer.getSubscriber(LegendNotification.LegendInfo::class.java).onLegendBaseInfoFetched(legendBaseInfo)
                     }
                 }
-            },500L)
+            },1000L)
         }
         return mLegendsBaseInfoById[id]
 
@@ -124,7 +124,7 @@ class LegendDataProviderImpl : ILegendDateProvider{
                 val legendPrice = LegendPrice(id,(30 until 100).random().toLong())
                 mLegendsPriceById[id] = legendPrice
                 Transfer.getSubscriber(LegendNotification.LegendInfo::class.java).onLegendPriceFetched(legendPrice)
-            },500L)
+            },600L)
         }
         return mLegendsPriceById[id]
     }
@@ -139,7 +139,7 @@ class LegendDataProviderImpl : ILegendDateProvider{
                         Transfer.getSubscriber(LegendNotification.LegendInfo::class.java).onLegendSkinsFetched(legendSkin)
                     }
                 }
-            },(100 until 500).random().toLong())
+            },(1000 until 2000).random().toLong())
         }
         return mLegendsSkinsById[id]
     }
