@@ -1,9 +1,8 @@
 ### diffadapter [![](https://jitpack.io/v/silencedut/diffadapter.svg)](https://jitpack.io/#silencedut/diffadapter)
-A high-performance , easy to use adapter framework for RecyclerViews,why use the library ,see 
 一款针对RecyclerView高效刷新，多类型列表，异步数据更新，崩溃等各种复杂难处理场景的高性能易用的列表库
 
 ## Introduce
-[如何实现一个高效、高性能的、异步数据实时刷新的列表]()
+[如何实现一个高效、高性能的、异步数据实时刷新的列表](http://www.silencedut.com/2019/01/24/%E5%A6%82%E4%BD%95%E4%BC%98%E9%9B%85%E7%9A%84%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AA%E9%AB%98%E6%95%88%E3%80%81%E9%AB%98%E6%80%A7%E8%83%BD%E3%80%81%E5%BC%82%E6%AD%A5%E6%95%B0%E6%8D%AE%E5%AE%9E%E6%97%B6%E5%88%B7%E6%96%B0%E7%9A%84%E5%88%97%E8%A1%A8/)
 
 diffadapter就是根据实际项目中各种复杂的列表需求，同时为了解决DiffUtil使用不方便，容易出错而实现的一个**高效，高性能的列表库
 ，侵入性低，方便接入**，致力于将列表需求的开发精力用于具体的Item Holder上，而不用花时间在一些能通用的和业务无关的地方。
@@ -21,7 +20,7 @@ diffadapter就是根据实际项目中各种复杂的列表需求，同时为了
 
 ### 基本用法
 
-**Step 1：继承`BaseMutableData`，实现需要展示的数据以及相应的判断UI是否需要更新的接口**
+**Step 1：继承`BaseMutableData`，主要实现`areUISame(newData: AnyViewData)` 和 `uniqueItemFeature()`**
 
 ```kotlin
 class AnyViewData(var id : Long ,var any : String) : BaseMutableData<AnyViewData>() {
@@ -113,7 +112,8 @@ public void updateData(BaseMutableData newData)
 
 ### 高阶用法
 
-基本用法中**Data和Holder绑定的模式并没什么特殊之处，也有很多类似的封装代码合开源库，[diffadapter](https://github.com/SilenceDut/diffadapter)最核心的地方在于高性能和异步数据对列表的更新上。**
+基本用法中**Data和Holder绑定的模式并没什么特殊之处，早在两年前的项目[KnowWeather](https://github.com/SilenceDut/KnowWeather)就已经用上这种思想，现在只是结合DiffUtil以及其他的疑难问题解决方案将其开源，diffadapter最核心的地方在于高性能和异步获取数据或者通知数据变化时列表的更新上**
+
 
 #### 多数据源异步更新
 
@@ -210,7 +210,7 @@ interface UpdateFunction<I,R extends BaseMutableData> {
 
 }
 ```
-`UpdateFunction`用来提供异步数据获取到后数据用来和列表中的数据匹配的规则和根据规则找到需要更改的对象后如果改变原对象，剩下的更新都由`diffadapter`来处理。如果符合条件的数据有很多个，，`applyChange(@NonNull I input,@NonNull R originalData)`会被回调多次。如下时：
+`UpdateFunction`用来提供异步数据获取到后数据用来和列表中的数据匹配的规则和根据规则找到需要更改的对象后如果改变原对象，剩下的更新都由`diffadapter`来处理。如果符合条件的数据有很多个，`applyChange(@NonNull I input,@NonNull R originalData)`会被回调多次。如下时：
 
 ```java
 Object providerMatchFeature(@NonNull I input) {
@@ -273,16 +273,16 @@ class ItemViewHolder(itemViewRoot: View, recyclerAdapter: DiffAdapter): BaseDiff
 ```
 根据变化的标志位，更新Item中需要变化部分的View
 
-更详细，多样的使用方式见[diffadapter](https://github.com/SilenceDut/diffadapter)
+更详细，多样的使用方式见demo
 
 ## 引入
 
-**Step1.Add it in your root add abuild.gradle at the end of repositories:**
+**Step1.Add it in your root add build.gradle at the end of repositories:**
 
 ```java
 allprojects {
 	repositories {
-		...
+		..
 		maven { url 'https://jitpack.io' }
 	}
 }
@@ -305,7 +305,7 @@ dependencies {
 ```
 
 ## License
-```
+
 
 ```
 Copyright 2017-2018 SilenceDut
