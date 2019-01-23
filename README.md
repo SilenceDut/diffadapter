@@ -7,7 +7,7 @@
 diffadapter就是根据实际项目中各种复杂的列表需求，同时为了解决DiffUtil使用不方便，容易出错而实现的一个**高效，高性能的列表库
 ，侵入性低，方便接入**，致力于将列表需求的开发精力用于具体的Item Holder上，而不用花时间在一些能通用的和业务无关的地方。
 使用DiffUtil作为来做最小更新，屏蔽外部调用**DiffUtil**的接口。无需自行实现DiffUtil,只用实现简单的数据接口和展示数据的Holder，
-不用自己去实现Adapter来管理数据和Holder之间的关系，不用考虑DiffUtil的实现细节在,就能快速的开发出一个高性能的复杂列表需求。
+不用自己去实现Adapter来管理数据和Holder之间的关系，不用考虑DiffUtil的实现细节,就能快速的开发出一个高性能的复杂列表需求。
 
 ## Feature
 
@@ -108,7 +108,8 @@ void insertData(int startPosition ,List<? extends BaseMutableData> datas)
 public void updateData(BaseMutableData newData)
 ```
 
-使用updateData(BaseMutableData newData)时，newData可以是新new的对象，也可以是修改后的原对象，不会出现[使用DiffUtil更新单个数据无效](#jump2)的问题
+使用updateData(BaseMutableData newData)时，newData可以是新new的对象，也可以是修改后的原对象，不会出现[使用DiffUtil更新单个数据无效](http://www.silencedut.com/2019/01/24/%E5%A6%82%E4%BD%95%E4%BC%98%E9%9B%85%E7%9A%84%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AA%E9%AB%98%E6%95%88%E3%80%81%E9%AB%98%E6%80%A7%E8%83%BD%E3%80%81%E5%BC%82%E6%AD%A5%E6%95%B0%E6%8D%AE%E5%AE%9E%E6%97%B6%E5%88%B7%E6%96%B0%E7%9A%84%E5%88%97%E8%A1%A8/)
+的问题
 
 ### 高阶用法
 
