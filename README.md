@@ -1,5 +1,10 @@
-### diffadapter [![](https://jitpack.io/v/silencedut/diffadapter.svg)](https://jitpack.io/#silencedut/diffadapter)
+## Diffadapter [![](https://jitpack.io/v/silencedut/diffadapter.svg)](https://jitpack.io/#silencedut/diffadapter)
 一款针对RecyclerView高效刷新，多类型列表，异步数据更新，崩溃等各种复杂难处理场景的高性能易用的列表库
+
+### Demo
+[diffadapter.apk](https://github.com/SilenceDut/diffadapter/blob/master/media/diffadapter.apk),图像url,名称，价格都是异步或者通知变化的数据
+
+![image](https://github.com/SilenceDut/diffadapter/blob/master/media/demo.gif)
 
 ## Introduce
 [如何实现一个高效、高性能的、异步数据实时刷新的列表](http://www.silencedut.com/2019/01/24/%E5%A6%82%E4%BD%95%E4%BC%98%E9%9B%85%E7%9A%84%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AA%E9%AB%98%E6%95%88%E3%80%81%E9%AB%98%E6%80%A7%E8%83%BD%E3%80%81%E5%BC%82%E6%AD%A5%E6%95%B0%E6%8D%AE%E5%AE%9E%E6%97%B6%E5%88%B7%E6%96%B0%E7%9A%84%E5%88%97%E8%A1%A8/)
@@ -275,9 +280,8 @@ class ItemViewHolder(itemViewRoot: View, recyclerAdapter: DiffAdapter): BaseDiff
 根据变化的标志位，更新Item中需要变化部分的View
 
 
-更详细，多样的使用方式和细节见demo,其中数据中的图像，价格，名称都是可变的数据
+更详细，多样的使用方式和细节见demo
 
-![image](https://github.com/SilenceDut/diffadapter/blob/master/media/demo.gif)
 
 ## 引入
 

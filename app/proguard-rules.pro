@@ -21,10 +21,34 @@
 #-renamesourcefileattribute SourceFile
 
 
--keep class * extends com.silencedut.diffadapter.holder.BaseDiffViewHolder {*;}
--keep class * extends com.silencedut.diffadapter.data.BaseMutableData {*;}
+# -------Okhttp3 ---------
+-dontwarn okhttp3.**
+-dontwarn okhttp3.logging.**
+-dontwarn okio.**
+-keep class okhttp3.internal.**{*;}
+-keep class okhttp3.** { *;}
+-keep interface okhttp3.* { *;}
 
+# -------kotlin ---------
+
+-keepclassmembernames class kotlinx.** {
+    volatile <fields>;
+}
+
+# -------hub ---------
 -keep class * implements com.silencedut.hub_annotation.IFindImplClz {*;}
 -keep class * implements com.silencedut.hub_annotation.IFindActivity {*;}
+
+
 -keepnames interface * extends com.silencedut.hub.IHub
 -keepnames interface * extends com.silencedut.hub.IHubActivity
+-keep interface * extends com.silencedut.hub.IHubActivity {<methods>;}
+
+-dontwarn com.alibaba.fastjson.**
+-keepattributes Signature
+-keepattributes *Annotation*
+# -------hub ---------
+
+# diffadapter
+-keep class * extends com.silencedut.diffadapter.holder.BaseDiffViewHolder {*;}
+-keep class * extends com.silencedut.diffadapter.data.BaseMutableData {*;}
