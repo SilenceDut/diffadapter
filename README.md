@@ -274,7 +274,8 @@ class ItemViewHolder(itemViewRoot: View, recyclerAdapter: DiffAdapter): BaseDiff
 ```
 根据变化的标志位，更新Item中需要变化部分的View
 
-更详细，多样的使用方式见demo
+
+更详细，多样的使用方式和细节见demo,其中数据中的图像，价格，名称都是可变的数据
 
 ![image](https://github.com/SilenceDut/diffadapter/blob/master/media/demo.gif)
 
