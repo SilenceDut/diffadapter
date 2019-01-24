@@ -276,6 +276,8 @@ class ItemViewHolder(itemViewRoot: View, recyclerAdapter: DiffAdapter): BaseDiff
 
 更详细，多样的使用方式见demo
 
+![image](https://github.com/SilenceDut/diffadapter/blob/master/media/demo.gif)
+
 ## 引入
 
 **Step1.Add it in your root add build.gradle at the end of repositories:**
