@@ -2,7 +2,9 @@
 一款针对RecyclerView高效刷新，多类型列表，异步数据更新，崩溃等各种复杂难处理场景的高性能易用的列表库
 
 ### Demo
-[diffadapter.apk](https://github.com/SilenceDut/diffadapter/blob/master/media/diffadapter.apk),图像url,名称，价格都是异步或者通知变化的数据
+[diffadapter.apk](https://github.com/SilenceDut/diffadapter/blob/master/media/diffadapter.apk)
+
+图像url,名称，价格都是异步或者通知变化的数据
 
 ![image](https://github.com/SilenceDut/diffadapter/blob/master/media/demo.gif)
 
