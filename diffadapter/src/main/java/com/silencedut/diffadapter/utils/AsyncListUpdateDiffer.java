@@ -62,7 +62,7 @@ public class AsyncListUpdateDiffer<T extends BaseMutableData> {
                 this.mUpdateCallback.onInserted(0, newList.size());
             } else {
                 final List<T> oldList = this.mList;
-                Log.d("AsyncListUpdateDiffer","start:"+this.mList.size() +","+newList.size()+","+mCurrentList.size());
+
                 this.mConfig.getBackgroundThreadExecutor().execute(new Runnable() {
                     @Override
                     public void run() {
@@ -94,10 +94,8 @@ public class AsyncListUpdateDiffer<T extends BaseMutableData> {
                                 T newItem = newList.get(newItemPosition);
                                 if (oldItem != null && newItem != null && oldItem.getClass() == newItem.getClass()) {
                                     return AsyncListUpdateDiffer.this.mConfig.getDiffCallback().areContentsTheSame(oldItem, newItem);
-                                } else if (oldItem == null && newItem == null) {
-                                    return true;
-                                } else {
-                                    throw new AssertionError();
+                                } else  {
+                                    return oldItem == null && newItem == null;
                                 }
                             }
 
@@ -109,7 +107,7 @@ public class AsyncListUpdateDiffer<T extends BaseMutableData> {
                                 if (oldItem != null && newItem != null) {
                                     return AsyncListUpdateDiffer.this.mConfig.getDiffCallback().getChangePayload(oldItem, newItem);
                                 } else {
-                                    throw new AssertionError();
+                                    return null;
                                 }
                             }
                         });

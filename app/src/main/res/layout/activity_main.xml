@@ -20,7 +20,7 @@
 
         />
 
-    <TextView
+    <Button
         android:id="@+id/fetch_data"
         app:layout_constraintHorizontal_chainStyle="spread"
         app:layout_constraintBottom_toTopOf="@+id/random_insert"
@@ -33,10 +33,10 @@
         android:layout_marginBottom="5dp"
         android:text="拉取列表"
         android:textColor="#fff"
-        android:background="#5f6fff"
+        android:background="@drawable/button_bg"
         />
 
-    <TextView
+    <Button
         android:id="@+id/random_update"
         app:layout_constraintBottom_toTopOf="@+id/random_insert"
         app:layout_constraintTop_toBottomOf="@+id/rv_test"
@@ -48,11 +48,11 @@
         android:layout_marginBottom="5dp"
         android:text="动态实时更新数据"
         android:textColor="#fff"
-        android:background="#5f6fff"
+        android:background="@drawable/button_bg"
         />
 
 
-    <TextView
+    <Button
         android:id="@+id/random_add"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintHorizontal_chainStyle="spread"
@@ -63,10 +63,10 @@
         android:padding="10dp"
         android:text="添加单个"
         android:textColor="#fff"
-        android:background="#5f6fff"
+        android:background="@drawable/button_bg"
         />
 
-    <TextView
+    <Button
         android:id="@+id/random_insert"
         app:layout_constraintBottom_toBottomOf="parent"
 
@@ -77,11 +77,11 @@
         android:padding="10dp"
         android:text="插入多个"
         android:textColor="#fff"
-        android:background="#5f6fff"
+        android:background="@drawable/button_bg"
         />
 
 
-    <TextView
+    <Button
         android:id="@+id/random_delete_many"
         app:layout_constraintBottom_toBottomOf="parent"
 
@@ -93,10 +93,10 @@
         android:text="删除多个"
         android:textColor="#fff"
 
-        android:background="#5f6fff"
+        android:background="@drawable/button_bg"
         />
 
-    <TextView
+    <Button
         android:id="@+id/random_delete_one"
         app:layout_constraintBottom_toBottomOf="parent"
 
@@ -107,7 +107,7 @@
         android:padding="10dp"
         android:text="删除一个"
         android:textColor="#fff"
-        android:background="#5f6fff"
+        android:background="@drawable/button_bg"
         />
 
 
