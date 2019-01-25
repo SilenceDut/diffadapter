@@ -283,7 +283,7 @@ class ItemViewHolder(itemViewRoot: View, recyclerAdapter: DiffAdapter): BaseDiff
 根据变化的标志位，更新Item中需要变化部分的View
 
 
-更详细，多样的使用方式和细节见demo
+更详细，多样的使用方式和细节见demo，demo用kotlin实现，使用了**mvvm**和**模块化**的框架方式。
 
 
 ## 引入
