@@ -67,7 +67,6 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
         this.mUpdateMediatorLiveData.observe(mLifecycleOwner, new Observer() {
             @Override
             public void onChanged(@Nullable Object o) {
-
             }
         });
 

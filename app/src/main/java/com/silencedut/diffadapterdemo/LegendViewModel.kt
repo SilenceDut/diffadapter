@@ -89,6 +89,7 @@ class LegendViewModel: ViewModel(), LegendNotification.LegendInfo, LegendNotific
 
             override fun applyChange(input: LegendPrice, originalData: LegendViewData): LegendViewData {
                 Log.d(TAG,"applyChange legendPriceData $input")
+                //可以new对象
                 return LegendViewData(originalData.id, originalData.legendBaseInfo, input.price)
             }
         })
@@ -101,6 +102,7 @@ class LegendViewModel: ViewModel(), LegendNotification.LegendInfo, LegendNotific
 
             override fun applyChange(input: LegendSkin, originalData: SkinViewData): SkinViewData {
                  Log.d(TAG,"applyChange legendSkinData $input")
+                 //可以在原对象上修改
                  originalData.legendSkin = input
                  return originalData
             }
