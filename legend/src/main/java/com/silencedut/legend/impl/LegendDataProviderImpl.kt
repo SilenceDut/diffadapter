@@ -19,6 +19,7 @@ import kotlin.collections.HashMap
 @HubInject(api = [ILegendDateProvider::class])
 class LegendDataProviderImpl : ILegendDateProvider{
 
+
     companion object {
         const val TAG = "LegendDataProviderImpl"
     }
@@ -84,22 +85,31 @@ class LegendDataProviderImpl : ILegendDateProvider{
         val startIndex = (0 until mLegendIds.size-1).random()
         val resultIds = mLegendIds.subList(startIndex,(startIndex+1 until mLegendIds.size+1).random())
         resultIds.forEach {
-            mLegendsBaseInfoById[it]?.let { _info ->
-                _info.name = _info.name.reversed()
-                Transfer.getSubscriber(LegendNotification.LegendInfo::class.java).onLegendBaseInfoFetched(_info)
-            }
-            val legendPrice = LegendPrice(it,(30 until 100).random().toLong())
-            Transfer.getSubscriber(LegendNotification.LegendInfo::class.java).onLegendPriceFetched(legendPrice)
+            updateLegendNameAndPrice(it)
 
-            mLegendsSkinsById[it]?.let {_skins ->
-
-                _skins.skins = _skins.skins.reversedArray()
-                Transfer.getSubscriber(LegendNotification.LegendInfo::class.java).onLegendSkinsFetched(_skins)
-            }
+            updateLegendSkin(it)
 
         }
     }
 
+
+    override fun updateLegendNameAndPrice(legendId: Long) {
+        mLegendsBaseInfoById[legendId]?.let { _info ->
+            _info.name = _info.name.reversed()
+            Transfer.getSubscriber(LegendNotification.LegendInfo::class.java).onLegendBaseInfoFetched(_info)
+        }
+        val legendPrice = LegendPrice(legendId,(30 until 100).random().toLong())
+        Transfer.getSubscriber(LegendNotification.LegendInfo::class.java).onLegendPriceFetched(legendPrice)
+
+    }
+
+    override fun updateLegendSkin(legendId: Long) {
+        mLegendsSkinsById[legendId]?.let {_skins ->
+
+            _skins.skins = _skins.skins.reversedArray()
+            Transfer.getSubscriber(LegendNotification.LegendInfo::class.java).onLegendSkinsFetched(_skins)
+        }
+    }
 
 
     override fun baseLegendData(id: Long): LegendBaseInfo? {

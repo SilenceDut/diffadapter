@@ -46,6 +46,14 @@ class LegendViewModel: ViewModel(), LegendNotification.LegendInfo, LegendNotific
         Transfer.getImpl(ILegendDateProvider::class.java).legendsDataChanged()
     }
 
+    fun updateSkinHolder(legendId : Long) {
+        Transfer.getImpl(ILegendDateProvider::class.java).updateLegendSkin(legendId)
+    }
+
+    fun updateLegendHolder(legendId : Long) {
+        Transfer.getImpl(ILegendDateProvider::class.java).updateLegendNameAndPrice(legendId)
+    }
+
     override fun onLegendsFetched(ids: List<Legend>) {
         legendsData.value = ids.map {
             convertToAdapterData(it)

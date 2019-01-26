@@ -46,7 +46,7 @@
         android:layout_height="wrap_content"
         android:padding="10dp"
         android:layout_marginBottom="5dp"
-        android:text="动态实时更新数据"
+        android:text="随机实时更新数据"
         android:textColor="#fff"
         android:background="@drawable/button_bg"
         />

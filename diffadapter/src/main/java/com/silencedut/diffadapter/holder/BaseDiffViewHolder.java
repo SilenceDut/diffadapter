@@ -30,6 +30,7 @@ public abstract class BaseDiffViewHolder<T extends BaseMutableData> extends Recy
     protected DiffAdapter mBaseAdapter;
     private Context mContext;
     private LayoutInflater mLayoutInflater;
+    private T mData;
 
     private void setUIContext(Context context) {
         this.mContext = context;
@@ -51,6 +52,11 @@ public abstract class BaseDiffViewHolder<T extends BaseMutableData> extends Recy
         setUIContext(mBaseAdapter.mContext);
     }
 
+    public final void update(@NonNull T data, int position) {
+        this.mData = data;
+        updateItem(data,position);
+    }
+
     /**
      * default update item way , which payload is empty
      * @param data
@@ -65,6 +71,10 @@ public abstract class BaseDiffViewHolder<T extends BaseMutableData> extends Recy
      */
     public void updatePartWithPayload(T data, @NonNull Bundle payload, int position){
 
+    }
+
+    protected final T getData() {
+        return mData;
     }
 
 

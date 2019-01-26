@@ -24,6 +24,10 @@ interface ILegendDateProvider:IHub{
 
     fun legendsDataChanged()
 
+    fun updateLegendSkin(legendId:Long)
+
+    fun updateLegendNameAndPrice(legendId:Long)
+
     /**
      * 通过id获取数据，如果有缓存直接返回，否则返回空，同时模拟获取数据
      */

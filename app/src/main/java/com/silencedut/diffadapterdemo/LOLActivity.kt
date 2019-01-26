@@ -16,6 +16,7 @@ import com.silencedut.diffadapterdemo.adapter.LegendHolder
 import com.silencedut.diffadapterdemo.adapter.LegendViewData
 import com.silencedut.diffadapterdemo.adapter.SkinHolder
 import com.silencedut.diffadapterdemo.adapter.SkinViewData
+import com.silencedut.taskscheduler.TaskScheduler
 import java.util.*
 
 /**
@@ -93,6 +94,13 @@ class LOLActivity : AppCompatActivity(){
             }
            
         }
+
+        TaskScheduler.runOnUIThread(this,object : Runnable{
+            override fun run() {
+                Toast.makeText(this@LOLActivity,"点击Item 刷新当前Item",Toast.LENGTH_SHORT).show()
+                TaskScheduler.runOnUIThread(this@LOLActivity,this,10000)
+            }
+        },10000)
 
         //如果更新很频繁，关闭动画能极大提高UI性能
         RvHelper.closeDefaultAnimator(mRVTest!!)

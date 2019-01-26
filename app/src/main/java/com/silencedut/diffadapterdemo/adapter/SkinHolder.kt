@@ -5,6 +5,7 @@ import android.view.View
 import android.widget.ImageView
 import com.silencedut.diffadapter.DiffAdapter
 import com.silencedut.diffadapter.holder.BaseDiffViewHolder
+import com.silencedut.diffadapterdemo.LegendViewModel
 import com.silencedut.diffadapterdemo.R
 import com.squareup.picasso.Picasso
 
@@ -29,6 +30,9 @@ class SkinHolder(itemView: View, recyclerAdapter: DiffAdapter): BaseDiffViewHold
         legendIcon = itemView.findViewById(R.id.legendIcon_iv)
         legendSkin1 = itemView.findViewById(R.id.skins1_iv)
         legendSkin2 = itemView.findViewById(R.id.skins2_iv)
+        itemView.setOnClickListener {
+            getViewModel(LegendViewModel::class.java).updateSkinHolder(data.id)
+        }
     }
 
     override fun updateItem(data: SkinViewData, position: Int) {

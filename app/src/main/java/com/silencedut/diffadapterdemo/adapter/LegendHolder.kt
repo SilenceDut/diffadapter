@@ -8,6 +8,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.silencedut.diffadapter.DiffAdapter
 import com.silencedut.diffadapter.holder.BaseDiffViewHolder
+import com.silencedut.diffadapterdemo.LegendViewModel
 import com.silencedut.diffadapterdemo.R
 import com.squareup.picasso.Picasso
 
@@ -31,6 +32,9 @@ class LegendHolder(itemViewRoot: View, recyclerAdapter: DiffAdapter): BaseDiffVi
         legendIconIv = itemViewRoot.findViewById(R.id.legendIcon_iv)
         legendNameTv = itemViewRoot.findViewById(R.id.legendName_tv)
         legendPriceTv = itemViewRoot.findViewById(R.id.legend_price)
+        itemView.setOnClickListener {
+            getViewModel(LegendViewModel::class.java).updateLegendHolder(data.id)
+        }
     }
 
     override fun updateItem(data: LegendViewData, position: Int) {

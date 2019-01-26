@@ -305,7 +305,7 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
     public void onBindViewHolder(@NonNull BaseDiffViewHolder baseDiffViewHolder, int position) {
 
         try {
-            baseDiffViewHolder.updateItem(mDatas.get(position), position);
+            baseDiffViewHolder.update(mDatas.get(position), position);
         }catch (Exception e) {
             Log.e(TAG,"onBindViewHolder updatePartWithPayload error",e);
         }
