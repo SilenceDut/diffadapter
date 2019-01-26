@@ -119,6 +119,8 @@ public void updateData(BaseMutableData newData)
 使用updateData(BaseMutableData newData)时，newData可以是新new的对象，也可以是修改后的原对象，不会出现[使用DiffUtil更新单个数据无效](http://www.silencedut.com/2019/01/24/%E5%A6%82%E4%BD%95%E4%BC%98%E9%9B%85%E7%9A%84%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AA%E9%AB%98%E6%95%88%E3%80%81%E9%AB%98%E6%80%A7%E8%83%BD%E3%80%81%E5%BC%82%E6%AD%A5%E6%95%B0%E6%8D%AE%E5%AE%9E%E6%97%B6%E5%88%B7%E6%96%B0%E7%9A%84%E5%88%97%E8%A1%A8/)
 的问题
 
+基本上就提供了上述很少的几个接口，主要是为了功能更清晰，侵入性更低，你可以根据自己的需要组合更多的功能，像下拉刷新，动画等。
+
 ### 高阶用法
 
 基本用法中**Data和Holder绑定的模式并没什么特殊之处，早在两年前的项目[KnowWeather](https://github.com/SilenceDut/KnowWeather)就已经用上这种思想，现在只是结合DiffUtil以及其他的疑难问题解决方案将其开源，diffadapter最核心的地方在于高性能和异步获取数据或者通知数据变化时列表的更新上**
