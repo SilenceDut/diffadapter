@@ -95,6 +95,9 @@ public class AsyncListUpdateDiffer<T extends BaseMutableData> {
 
                             @Override
                             public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
+                                if(oldItemPosition >=getOldListSize() || newItemPosition > getNewListSize()) {
+                                    return false;
+                                }
                                 T oldItem = oldList.get(oldItemPosition);
                                 T newItem = newList.get(newItemPosition);
                                 if (oldItem != null && newItem != null &&  oldItem.getClass() == newItem.getClass() ) {
@@ -108,6 +111,9 @@ public class AsyncListUpdateDiffer<T extends BaseMutableData> {
                             @Override
                             @Nullable
                             public Object getChangePayload(int oldItemPosition, int newItemPosition) {
+                                if(oldItemPosition >=getOldListSize() || newItemPosition > getNewListSize()) {
+                                    return false;
+                                }
                                 T oldItem = oldList.get(oldItemPosition);
                                 T newItem = newList.get(newItemPosition);
                                 if (oldItem != null && newItem != null && oldItem.getClass() == newItem.getClass()) {
