@@ -22,7 +22,6 @@ public abstract class BaseMutableData<T extends BaseMutableData> implements IPro
 
     /**
      * 通过一个列表里的数据独一无二的特征来判断是不是同一个Item，如uid，消息id等
-     * 仅当新旧数据的uniqueItemFeature相同时才会进行 {@link #areUISame( T)}的判断
      * 这个方法很重要，用来处理DiffUtil里的areItemsTheSame方法，可以减少很多不必要的updateItem调用，不能简单的根据view类型来判断
      * @return 是不是同一个item
      */
@@ -30,7 +29,7 @@ public abstract class BaseMutableData<T extends BaseMutableData> implements IPro
     public abstract Object uniqueItemFeature();
 
     /**
-     * 判断新旧数据对UI是否影响, 仅当新旧数据的uniqueItemFeature相同时才会进行 {@link #areUISame( T)}的判断
+     * 判断新旧数据对UI是否影响, 即使不同的数据但UI不需要更新也返回true
      * @param data 需要对比的数据
      * @return 是否需要跟新UI
      */

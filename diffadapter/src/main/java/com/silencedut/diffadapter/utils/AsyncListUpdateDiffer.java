@@ -14,6 +14,7 @@ import android.util.Log;
 import com.silencedut.diffadapter.data.BaseMutableData;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executor;
 
@@ -30,7 +31,6 @@ public class AsyncListUpdateDiffer<T extends BaseMutableData> {
     @Nullable
     private List<T> mList;
 
-    private List<T> mCurrentList ;
     private int mMaxScheduledGeneration;
 
 
@@ -43,8 +43,7 @@ public class AsyncListUpdateDiffer<T extends BaseMutableData> {
     }
 
     private void updateCurrentList(List<T> currentList) {
-        this.mCurrentList = currentList;
-        this.mListChangedCallback.onListChanged(mCurrentList);
+        this.mListChangedCallback.onListChanged(currentList);
     }
 
 
@@ -61,8 +60,7 @@ public class AsyncListUpdateDiffer<T extends BaseMutableData> {
                 updateCurrentList(new ArrayList<>(newList));
                 this.mUpdateCallback.onInserted(0, newList.size());
             } else {
-                final List<T> oldList = this.mList;
-
+                final List<T> oldList = Collections.unmodifiableList(this.mList);
                 this.mConfig.getBackgroundThreadExecutor().execute(new Runnable() {
                     @Override
                     public void run() {
@@ -79,20 +77,28 @@ public class AsyncListUpdateDiffer<T extends BaseMutableData> {
 
                             @Override
                             public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
+                                if(oldItemPosition >=getOldListSize() || newItemPosition > getNewListSize()) {
+                                    return false;
+                                }
+
                                 T oldItem = oldList.get(oldItemPosition);
                                 T newItem = newList.get(newItemPosition);
-                                if (oldItem != null && newItem != null ) {
-                                    return AsyncListUpdateDiffer.this.mConfig.getDiffCallback().areItemsTheSame(oldItem, newItem);
-                                } else {
-                                    return oldItem == null && newItem == null;
+
+                                if(oldItem == null || newItem == null) {
+                                    return false;
                                 }
+                                if(oldItem.getItemViewId()!=newItem.getItemViewId() || oldItem.getClass() != newItem.getClass()) {
+                                    return false;
+                                }
+                                return AsyncListUpdateDiffer.this.mConfig.getDiffCallback().areItemsTheSame(oldItem, newItem);
                             }
 
                             @Override
                             public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
                                 T oldItem = oldList.get(oldItemPosition);
                                 T newItem = newList.get(newItemPosition);
-                                if (oldItem != null && newItem != null && oldItem.getClass() == newItem.getClass()) {
+                                if (oldItem != null && newItem != null &&  oldItem.getClass() == newItem.getClass() ) {
+                                    Log.d("AsyncListUpdateDiffer"," old:"+oldItem.getClass() + "new:"+newItem.getClass());
                                     return AsyncListUpdateDiffer.this.mConfig.getDiffCallback().areContentsTheSame(oldItem, newItem);
                                 } else  {
                                     return oldItem == null && newItem == null;
@@ -104,7 +110,7 @@ public class AsyncListUpdateDiffer<T extends BaseMutableData> {
                             public Object getChangePayload(int oldItemPosition, int newItemPosition) {
                                 T oldItem = oldList.get(oldItemPosition);
                                 T newItem = newList.get(newItemPosition);
-                                if (oldItem != null && newItem != null) {
+                                if (oldItem != null && newItem != null && oldItem.getClass() == newItem.getClass()) {
                                     return AsyncListUpdateDiffer.this.mConfig.getDiffCallback().getChangePayload(oldItem, newItem);
                                 } else {
                                     return null;
@@ -116,7 +122,6 @@ public class AsyncListUpdateDiffer<T extends BaseMutableData> {
                             public void run() {
                                 if (AsyncListUpdateDiffer.this.mMaxScheduledGeneration == runGeneration) {
                                     AsyncListUpdateDiffer.this.latchList(newList, result);
-                                    Log.d("AsyncListUpdateDiffer","end");
                                 }
 
                             }
@@ -136,6 +141,8 @@ public class AsyncListUpdateDiffer<T extends BaseMutableData> {
     }
 
     public void updateOldList(@Nullable List<T> newList) {
+        Log.d("AsyncListUpdateDiffer","updateOldList:"+newList.size());
+        AsyncListUpdateDiffer.this.mMaxScheduledGeneration ++;
         this.mList = newList;
     }
 

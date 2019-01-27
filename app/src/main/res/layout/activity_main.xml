@@ -41,12 +41,27 @@
         app:layout_constraintBottom_toTopOf="@+id/random_insert"
         app:layout_constraintTop_toBottomOf="@+id/rv_test"
         app:layout_constraintLeft_toRightOf="@+id/fetch_data"
-        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintRight_toRightOf="@+id/forcible_crash_test"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="10dp"
         android:layout_marginBottom="5dp"
         android:text="随机实时更新数据"
+        android:textColor="#fff"
+        android:background="@drawable/button_bg"
+        />
+
+    <Button
+        android:id="@+id/forcible_crash_test"
+        app:layout_constraintBottom_toTopOf="@+id/random_insert"
+        app:layout_constraintTop_toBottomOf="@+id/rv_test"
+        app:layout_constraintLeft_toRightOf="@+id/random_update"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:layout_marginBottom="5dp"
+        android:text="暴力崩溃测试"
         android:textColor="#fff"
         android:background="@drawable/button_bg"
         />
