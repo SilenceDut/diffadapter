@@ -27,10 +27,12 @@ import java.util.*
  * @date 2019/1/17
  */
 private const val TAG = "LOLActivity"
+private const val MAX_COUNT = 5000
 class LOLActivity : AppCompatActivity(){
     private var mRVTest : RecyclerView? = null
     private var mTestHandler : Handler?=null
     private var testStarted = false
+    private var testCount = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -111,6 +113,9 @@ class LOLActivity : AppCompatActivity(){
                     mTestHandler?.let {
                         it.post(object : Runnable {
                             override fun run() {
+                                if(verifyCount()) {
+                                    return
+                                }
                                 val oneLegend = Transfer.getImpl(ILegendDateProvider::class.java).fetchOneLegends()
                                 diffAdapter.addData(legendViewModel.convertToAdapterData(oneLegend))
                                 val time = (500 until 1500L).random()
@@ -120,6 +125,9 @@ class LOLActivity : AppCompatActivity(){
 
                         it.post(object : Runnable {
                             override fun run() {
+                                if(verifyCount()) {
+                                    return
+                                }
                                 legendViewModel.fetchLegends()
                                 val time = (100 until 300L).random()
                                 it.postDelayed(this, time)
@@ -128,13 +136,36 @@ class LOLActivity : AppCompatActivity(){
 
                         it.post(object : Runnable {
                             override fun run() {
-                                diffAdapter.deleteData(diffAdapter.datas[(0 until diffAdapter.itemCount).random()])
+                                if(verifyCount()) {
+                                    return
+                                }
+                                if(diffAdapter.itemCount>0) {
+                                    diffAdapter.deleteData(diffAdapter.datas[(0 until diffAdapter.itemCount).random()])
 
-                                val insertIndex = (0 until diffAdapter.itemCount).random()
-                                val insertSize = (0 until diffAdapter.itemCount).random()
+                                    val insertIndex = (0 until diffAdapter.itemCount).random()
+                                    val insertSize = (0 until diffAdapter.itemCount).random()
 
-                                val newList = ArrayList(diffAdapter.datas.subList(0, insertSize))
-                                diffAdapter.insertData(insertIndex, newList)
+                                    val newList = ArrayList(diffAdapter.datas.subList(0, insertSize))
+                                    diffAdapter.insertData(insertIndex, newList)
+
+
+                                }
+                                val time = (1000 until 1500L).random()
+                                it.postDelayed(this, time)
+                            }
+                        })
+
+                        it.post(object : Runnable {
+                            override fun run() {
+                                if(verifyCount()) {
+                                    return
+                                }
+                                if(diffAdapter.itemCount>0) {
+                                    val deleteIndex = (0 until diffAdapter.itemCount).random()
+                                    val deleteSize = (0 until diffAdapter.itemCount).random()
+                                    diffAdapter.deleteData(deleteIndex, deleteSize)
+
+                                }
                                 val time = (300 until 800L).random()
                                 it.postDelayed(this, time)
                             }
@@ -142,16 +173,9 @@ class LOLActivity : AppCompatActivity(){
 
                         it.post(object : Runnable {
                             override fun run() {
-                                val deleteIndex = (0 until diffAdapter.itemCount).random()
-                                val deleteSize = (0 until diffAdapter.itemCount).random()
-                                diffAdapter.deleteData(deleteIndex, deleteSize)
-                                val time = (300 until 800L).random()
-                                it.postDelayed(this, time)
-                            }
-                        })
-
-                        it.post(object : Runnable {
-                            override fun run() {
+                                if(verifyCount()) {
+                                    return
+                                }
                                 mRVTest?.let {
                                     RvHelper.scrollToBottom(it,(0 until diffAdapter.itemCount).random())
                                 }
@@ -192,13 +216,23 @@ class LOLActivity : AppCompatActivity(){
         return Any()
     }
 
+    private fun verifyCount() :Boolean{
+        testCount++
+        if(testCount > MAX_COUNT) {
+            findViewById<TextView>(R.id.forcible_crash_test).text = "暴力崩溃测试"
+            mTestHandler?.removeCallbacksAndMessages(null)
+            testStarted = false
+            testCount = 0
+            return true
+        }
+        return false
+    }
+
     private fun IntRange.random() : Int {
         try {
             return Random().nextInt((endInclusive + 1) - start) +  start
         }catch (e : Exception) {
             Log.d(TAG,"exception on random",e)
-            Toast.makeText(this@LOLActivity,"取随机数崩溃，不是DiffAdapter引起的",Toast.LENGTH_LONG).show()
-
         }
         return 0
     }

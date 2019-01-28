@@ -207,8 +207,8 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
 
             if(data.uniqueItemFeature().equals(iterator.next().uniqueItemFeature())) {
                 iterator.remove();
-                mDifferHelper.updateOldList(mDatas);
                 notifyItemRemoved(position);
+                mDifferHelper.updateOldList(mDatas);
                 break;
             }
         }
@@ -233,8 +233,8 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
             deleteSize++;
         }
 
-        mDifferHelper.updateOldList(mDatas);
         notifyItemRangeRemoved(startPosition,deleteSize);
+        mDifferHelper.updateOldList(mDatas);
     }
 
     public void insertData(int startPosition ,List<? extends BaseMutableData> datas) {
@@ -242,9 +242,10 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
             return;
         }
         mDatas.addAll(startPosition,datas);
-        mDifferHelper.updateOldList(mDatas);
 
         notifyItemRangeInserted(startPosition,datas.size());
+        mDifferHelper.updateOldList(mDatas);
+
     }
 
 
@@ -364,6 +365,9 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
         return classLists;
     }
 
+    /**
+     * 当前显示在列表中的数据，和{@link #setDatas(List)}里的数据大小可能不一样，由于DiffUtil可能还在计算的问题
+     */
     public List<BaseMutableData> getDatas() {
         return mDatas;
     }

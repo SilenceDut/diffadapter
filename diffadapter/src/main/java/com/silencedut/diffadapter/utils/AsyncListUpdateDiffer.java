@@ -14,7 +14,6 @@ import android.util.Log;
 import com.silencedut.diffadapter.data.BaseMutableData;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executor;
 
@@ -61,7 +60,7 @@ public class AsyncListUpdateDiffer<T extends BaseMutableData> {
                 updateCurrentList(new ArrayList<>(newList));
                 this.mUpdateCallback.onInserted(0, newList.size());
             } else {
-                final List<T> oldList = Collections.unmodifiableList(this.mList);
+                final List<T> oldList = new ArrayList<>(this.mList);
                 Log.d(TAG,"oldList size"+oldList.size() +"new size"+newList.size() +"runGeneration"+runGeneration+"mMaxScheduledGeneration"+mMaxScheduledGeneration);
                 this.mConfig.getBackgroundThreadExecutor().execute(new Runnable() {
                     @Override
@@ -79,9 +78,7 @@ public class AsyncListUpdateDiffer<T extends BaseMutableData> {
 
                             @Override
                             public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
-                                if(oldItemPosition >=getOldListSize() || newItemPosition > getNewListSize()) {
-                                    return false;
-                                }
+
                                 T oldItem = oldList.get(oldItemPosition);
                                 T newItem = newList.get(newItemPosition);
                                 if(oldItem == null || newItem == null) {
@@ -95,9 +92,7 @@ public class AsyncListUpdateDiffer<T extends BaseMutableData> {
 
                             @Override
                             public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-                                if(oldItemPosition >=getOldListSize() || newItemPosition > getNewListSize()) {
-                                    return false;
-                                }
+
                                 T oldItem = oldList.get(oldItemPosition);
                                 T newItem = newList.get(newItemPosition);
                                 if (oldItem != null && newItem != null &&  oldItem.getClass() == newItem.getClass() ) {
@@ -109,9 +104,7 @@ public class AsyncListUpdateDiffer<T extends BaseMutableData> {
                             @Override
                             @Nullable
                             public Object getChangePayload(int oldItemPosition, int newItemPosition) {
-                                if(oldItemPosition >=getOldListSize() || newItemPosition > getNewListSize()) {
-                                    return null;
-                                }
+
                                 T oldItem = oldList.get(oldItemPosition);
                                 T newItem = newList.get(newItemPosition);
                                 if (oldItem != null && newItem != null && oldItem.getClass() == newItem.getClass()) {
