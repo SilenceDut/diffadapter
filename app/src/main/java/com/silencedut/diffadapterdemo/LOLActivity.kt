@@ -1,6 +1,6 @@
 package com.silencedut.diffadapterdemo
 
-import android.arch.lifecycle.Observer
+import android.arch.lifecycle.Lifecycle
 import android.os.Bundle
 import android.os.Handler
 import android.support.v7.app.AppCompatActivity
@@ -54,9 +54,9 @@ class LOLActivity : AppCompatActivity(){
         //监听变化，自动刷新
         legendViewModel.addUpdateMediator(diffAdapter)
 
-        legendViewModel.legendsData.observe(this, Observer {
+        legendViewModel.legendsData.observeForever{
             diffAdapter.datas = it
-        })
+        }
 
         findViewById<View>(R.id.fetch_data).setOnClickListener {
             legendViewModel.fetchLegends()
@@ -118,7 +118,7 @@ class LOLActivity : AppCompatActivity(){
                                 }
                                 val oneLegend = Transfer.getImpl(ILegendDateProvider::class.java).fetchOneLegends()
                                 diffAdapter.addData(legendViewModel.convertToAdapterData(oneLegend))
-                                val time = (500 until 1500L).random()
+                                val time = (200 until 400L).random()
                                 it.postDelayed(this, time)
                             }
                         })
@@ -129,7 +129,7 @@ class LOLActivity : AppCompatActivity(){
                                     return
                                 }
                                 legendViewModel.fetchLegends()
-                                val time = (100 until 300L).random()
+                                val time = (200 until 500L).random()
                                 it.postDelayed(this, time)
                             }
                         })
@@ -166,7 +166,7 @@ class LOLActivity : AppCompatActivity(){
                                     diffAdapter.deleteData(deleteIndex, deleteSize)
 
                                 }
-                                val time = (300 until 800L).random()
+                                val time = (1000 until 3000L).random()
                                 it.postDelayed(this, time)
                             }
                         })
@@ -187,9 +187,7 @@ class LOLActivity : AppCompatActivity(){
                     }
                 }
             } else {
-                findViewById<TextView>(R.id.forcible_crash_test).text = "暴力崩溃测试"
-                mTestHandler?.removeCallbacksAndMessages(null)
-                testStarted = false
+                endTest()
             }
         }
 
@@ -197,7 +195,9 @@ class LOLActivity : AppCompatActivity(){
 
         TaskScheduler.runOnUIThread(this,object : Runnable{
             override fun run() {
-                Toast.makeText(this@LOLActivity,"点击Item 刷新当前Item",Toast.LENGTH_SHORT).show()
+                if(lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
+                    Toast.makeText(this@LOLActivity,"点击Item 刷新当前Item",Toast.LENGTH_SHORT).show()
+                }
                 TaskScheduler.runOnUIThread(this@LOLActivity,this,10000)
             }
         },10000)
@@ -205,6 +205,13 @@ class LOLActivity : AppCompatActivity(){
         //如果更新很频繁，关闭动画能极大提高UI性能
         RvHelper.closeDefaultAnimator(mRVTest!!)
 
+    }
+
+    private fun endTest() {
+        mTestHandler?.removeCallbacksAndMessages(null)
+        findViewById<TextView>(R.id.forcible_crash_test).text = "暴力崩溃测试"
+        mTestHandler?.removeCallbacksAndMessages(null)
+        testStarted = false
     }
 
     private fun verify( diffAdapter: DiffAdapter):Any? {
@@ -220,8 +227,7 @@ class LOLActivity : AppCompatActivity(){
         testCount++
         if(testCount > MAX_COUNT) {
             findViewById<TextView>(R.id.forcible_crash_test).text = "暴力崩溃测试"
-            mTestHandler?.removeCallbacksAndMessages(null)
-            testStarted = false
+            endTest()
             testCount = 0
             return true
         }
@@ -237,7 +243,10 @@ class LOLActivity : AppCompatActivity(){
         return 0
     }
 
-
+    override fun onStop() {
+        super.onStop()
+//        endTest()
+    }
 
 
 }

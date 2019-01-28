@@ -1,5 +1,7 @@
 package com.silencedut.diffadapter;
 
+import android.arch.lifecycle.GenericLifecycleObserver;
+import android.arch.lifecycle.Lifecycle;
 import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MediatorLiveData;
@@ -21,7 +23,6 @@ import android.view.ViewGroup;
 import com.silencedut.diffadapter.data.BaseMutableData;
 import com.silencedut.diffadapter.holder.BaseDiffViewHolder;
 import com.silencedut.diffadapter.holder.NoDataDifferHolder;
-import com.silencedut.diffadapter.utils.AsyncListUpdateDiffer;
 import com.silencedut.diffadapter.utils.ListChangedCallback;
 import com.silencedut.diffadapter.utils.UpdateFunction;
 
@@ -53,7 +54,9 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
     private LayoutInflater mInflater;
     private LifecycleOwner mLifecycleOwner;
     private AsyncListUpdateDiffer<BaseMutableData> mDifferHelper;
-    private MediatorLiveData mUpdateMediatorLiveData = new MediatorLiveData<>();
+    private MediatorLiveData<Boolean> mUpdateMediatorLiveData = new MediatorLiveData<>();
+
+
 
     public Fragment attachedFragment;
     public Context mContext;
@@ -61,18 +64,41 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
 
     @SuppressWarnings("unchecked")
     public DiffAdapter(FragmentActivity appCompatActivity) {
+        doInit(appCompatActivity,appCompatActivity);
+    }
+
+    public DiffAdapter(Fragment attachedFragment) {
+        doInit(attachedFragment.getActivity(),attachedFragment);
+        this.attachedFragment = attachedFragment;
+    }
+
+    private void doInit(FragmentActivity appCompatActivity,LifecycleOwner lifecycleOwner) {
         this.mContext = appCompatActivity;
         this.mInflater = LayoutInflater.from(appCompatActivity);
-        this.mLifecycleOwner = appCompatActivity;
-        this.mUpdateMediatorLiveData.observe(mLifecycleOwner, new Observer() {
+        this.mLifecycleOwner = lifecycleOwner;
+        this.mUpdateMediatorLiveData.observe(mLifecycleOwner, new Observer<Boolean>() {
             @Override
-            public void onChanged(@Nullable Object o) {
+            public void onChanged(@Nullable Boolean o) {
             }
         });
 
-        mDifferHelper = new AsyncListUpdateDiffer(this, new ListChangedCallback() {
+        mLifecycleOwner.getLifecycle().addObserver(new GenericLifecycleObserver() {
             @Override
-            public void onListChanged(List currentList) {
+            public void onStateChanged(LifecycleOwner source, Lifecycle.Event event) {
+                if(event == Lifecycle.Event.ON_DESTROY) {
+                    if(mLifecycleOwner!=null ) {
+                        mLifecycleOwner.getLifecycle().removeObserver(this);
+                    }
+                    AsyncListUpdateDiffer.DIFF_MAIN_HANDLER.removeCallbacksAndMessages(null);
+                }
+            }
+
+        });
+
+
+        mDifferHelper = new AsyncListUpdateDiffer<>(this, new ListChangedCallback<BaseMutableData>() {
+            @Override
+            public void onListChanged(List<BaseMutableData> currentList) {
                 mDatas = currentList;
             }
         }, new DiffUtil.ItemCallback<BaseMutableData>() {
@@ -94,12 +120,6 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
                 return oldItem.getDiffPayload(newItem);
             }
         });
-    }
-
-    public DiffAdapter(Fragment attachedFragment) {
-        this(attachedFragment.getActivity());
-        this.attachedFragment = attachedFragment;
-        this.mLifecycleOwner = attachedFragment;
     }
 
     public void registerHolder(Class<? extends BaseDiffViewHolder> viewHolder, int itemViewType) {
@@ -179,72 +199,91 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
         mDifferHelper.submitList(newList);
     }
 
-    public void clear() {
-        mDatas.clear();
-        List<BaseMutableData> newList = new ArrayList<>(mDatas);
-        mDifferHelper.submitList(newList);
-    }
 
-    public <T extends BaseMutableData> void addData(T data) {
+
+    public <T extends BaseMutableData> void addData(final T data) {
         if (data == null) {
             return;
         }
-        mDatas.add(data);
-        notifyItemChanged(mDatas.size()-1);
-        mDifferHelper.updateOldList(mDatas);
-    }
 
+        mDifferHelper.updateOldList(new Runnable() {
+            @Override
+            public void run() {
+                mDatas.add(data);
+                notifyItemChanged(mDatas.size() - 1);
 
-    public void deleteData(BaseMutableData data) {
-        if (data == null) {
-            return;
-        }
-        Iterator<BaseMutableData> iterator = mDatas.iterator();
-
-        int position = -1;
-        while (iterator.hasNext()) {
-            position ++;
-
-            if(data.uniqueItemFeature().equals(iterator.next().uniqueItemFeature())) {
-                iterator.remove();
-                notifyItemRemoved(position);
-                mDifferHelper.updateOldList(mDatas);
-                break;
             }
-        }
+        },mDatas);
+
 
     }
 
-    public void deleteData(int startPosition, int size) {
+
+    public void deleteData(final BaseMutableData data) {
+        if (data == null) {
+            return;
+        }
+
+        mDifferHelper.updateOldList(new Runnable() {
+            @Override
+            public void run() {
+                Iterator<BaseMutableData> iterator = mDatas.iterator();
+
+                int position = -1;
+                while (iterator.hasNext()) {
+                    position ++;
+
+                    if(data.uniqueItemFeature().equals(iterator.next().uniqueItemFeature())) {
+                        iterator.remove();
+                        break;
+                    }
+                }
+                notifyItemRemoved(position);
+            }
+        },mDatas);
+    }
+
+    public void deleteData(final int startPosition, final int size) {
         if (startPosition + size >= mDatas.size()) {
             return;
         }
 
-        Iterator<BaseMutableData> iterator = mDatas.iterator();
-        int deleteSize =0;
-        int startIndex =0;
-        while (startIndex < startPosition && iterator.hasNext() ) {
-            startIndex++;
-            iterator.next();
-        }
-        while (iterator.hasNext() && deleteSize < size) {
-            iterator.next();
-            iterator.remove();
-            deleteSize++;
-        }
+        mDifferHelper.updateOldList(new Runnable() {
+            @Override
+            public void run() {
+                Iterator<BaseMutableData> iterator = mDatas.iterator();
+                int deleteSize =0;
+                int startIndex =0;
+                while (startIndex < startPosition && iterator.hasNext() ) {
+                    startIndex++;
+                    iterator.next();
+                }
+                while (iterator.hasNext() && deleteSize < size) {
+                    iterator.next();
+                    iterator.remove();
+                    deleteSize++;
+                }
 
-        notifyItemRangeRemoved(startPosition,deleteSize);
-        mDifferHelper.updateOldList(mDatas);
+
+                notifyItemRangeRemoved(startPosition, deleteSize);
+
+            }
+        },mDatas);
+
     }
 
-    public void insertData(int startPosition ,List<? extends BaseMutableData> datas) {
+    public void insertData(final int startPosition , final List<? extends BaseMutableData> datas) {
         if (datas == null || datas.isEmpty()) {
             return;
         }
-        mDatas.addAll(startPosition,datas);
 
-        notifyItemRangeInserted(startPosition,datas.size());
-        mDifferHelper.updateOldList(mDatas);
+        mDifferHelper.updateOldList(new Runnable() {
+            @Override
+            public void run() {
+                mDatas.addAll(startPosition,datas);
+                notifyItemRangeInserted(startPosition,datas.size());
+            }
+        },mDatas);
 
     }
 
