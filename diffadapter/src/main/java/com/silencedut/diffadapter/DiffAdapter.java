@@ -199,7 +199,11 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
         mDifferHelper.submitList(newList);
     }
 
+    public void clear() {
 
+        mDifferHelper.submitList(null);
+
+    }
 
     public <T extends BaseMutableData> void addData(final T data) {
         if (data == null) {
@@ -214,7 +218,6 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
 
             }
         },mDatas);
-
 
     }
 
