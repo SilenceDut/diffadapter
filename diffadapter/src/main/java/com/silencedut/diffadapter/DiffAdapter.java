@@ -376,7 +376,12 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
                         diffPayloads.putAll((Bundle) payload);
                     }
                 }
-                holder.updatePartWithPayload(mDatas.get(position),diffPayloads, position);
+                if(diffPayloads.isEmpty()) {
+                    this.onBindViewHolder(holder,position);
+                }else {
+                    holder.updatePartWithPayload(mDatas.get(position),diffPayloads, position);
+                }
+
             }catch (Exception e) {
                 Log.e(TAG,"onBindViewHolder updatePartWithPayload payload error",e);
             }
