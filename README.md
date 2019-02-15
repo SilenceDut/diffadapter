@@ -80,8 +80,7 @@ val diffAdapter = DiffAdapter(this)
 
 //注册类型，不分先后顺序
 diffAdapter.registerHolder(AnyHolder::class.java, AnyViewData.VIEW_ID)
-        diffAdapter.registerHolder(AnyHolder2::class.java, AnyViewData2.VIEW_ID)
-
+diffAdapter.registerHolder(AnyHolder2::class.java, AnyViewData2.VIEW_ID)
 diffAdapter.registerHolder(AnyHolder3::class.java, AnyViewData3.VIEW_ID)
 
 val linearLayoutManager = LinearLayoutManager(this)
