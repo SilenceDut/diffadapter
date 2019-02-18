@@ -56,6 +56,7 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
     private AsyncListUpdateDiffer<BaseMutableData> mDifferHelper;
     private MediatorLiveData<Boolean> mUpdateMediatorLiveData = new MediatorLiveData<>();
     private long mCanUpdateTimeMill;
+    private static final int UPDATE_DELAY_THRESHOLD = 100;
 
     public Fragment attachedFragment;
     public Context mContext;
@@ -183,9 +184,10 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
                     for(final R oldData : oldMatchedDatas) {
                         if(oldData != null ) {
                             long current  = System.currentTimeMillis();
-                            if(current > mCanUpdateTimeMill) {
-                                mCanUpdateTimeMill =current;
+                            if(current > mCanUpdateTimeMill || getItemCount() < UPDATE_DELAY_THRESHOLD) {
+
                                 updateData(updateFunction.applyChange(dataSource,  oldData));
+                                mCanUpdateTimeMill = current+ AsyncListUpdateDiffer.DELAY_STEP;
                             }else {
                                 long delay = mCanUpdateTimeMill - current;
 
@@ -195,8 +197,9 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
                                         updateData(updateFunction.applyChange(dataSource, oldData));
                                     }
                                 }, delay);
+                                mCanUpdateTimeMill += AsyncListUpdateDiffer.DELAY_STEP;
                             }
-                            mCanUpdateTimeMill += AsyncListUpdateDiffer.DELAY_STEP;
+
                         }
                     }
                 }

@@ -24,17 +24,16 @@ import java.util.List;
  */
 class AsyncListUpdateDiffer<T extends BaseMutableData> {
     private static final String TAG ="AsyncListUpdateDiffer";
-    static final Handler DIFF_MAIN_HANDLER = new Handler(Looper.getMainLooper());
     private final ListUpdateCallback mUpdateCallback;
     private final AsyncDifferConfig<T> mConfig;
     private final ListChangedCallback<T> mListChangedCallback;
-
-
-    static final int DELAY_STEP = 5;
     @Nullable
     private List<T> mOldList;
     private long mMaxScheduledGeneration;
     private long mCanSyncTime = 0;
+
+    static final int DELAY_STEP = 5;
+    static final Handler DIFF_MAIN_HANDLER = new Handler(Looper.getMainLooper());
 
 
     AsyncListUpdateDiffer(@NonNull DiffAdapter adapter, @NonNull ListChangedCallback<T> listChangedCallback, @NonNull DiffUtil.ItemCallback<T> diffCallback) {
@@ -145,7 +144,7 @@ class AsyncListUpdateDiffer<T extends BaseMutableData> {
             syncGenerationAndList(oldDatas);
         }else {
             final long runGeneration =  AsyncListUpdateDiffer.this.mMaxScheduledGeneration;
-            long timeDelay = (this.mOldList!=null ? this.mOldList.size():0) * DELAY_STEP  ;
+            long timeDelay = (this.mOldList!=null ? this.mOldList.size():0) * DELAY_STEP ;
             DIFF_MAIN_HANDLER.postDelayed(new Runnable() {
                 @Override
                 public void run() {
