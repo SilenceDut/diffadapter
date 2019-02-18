@@ -48,19 +48,18 @@ import java.util.List;
 public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
 
     private static final String TAG = "DiffAdapter";
-    private SparseArray<Class<? extends BaseDiffViewHolder>> typeHolders = new SparseArray();
+    private SparseArray<Class<? extends BaseDiffViewHolder>> typeHolders = new SparseArray<>();
     private List<BaseMutableData> mDatas ;
 
     private LayoutInflater mInflater;
     private LifecycleOwner mLifecycleOwner;
     private AsyncListUpdateDiffer<BaseMutableData> mDifferHelper;
     private MediatorLiveData<Boolean> mUpdateMediatorLiveData = new MediatorLiveData<>();
-
-
+    private long mCanUpdateTimeMill;
 
     public Fragment attachedFragment;
     public Context mContext;
-    
+
 
     @SuppressWarnings("unchecked")
     public DiffAdapter(FragmentActivity appCompatActivity) {
@@ -146,7 +145,7 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
     public <I ,R extends BaseMutableData> void  addUpdateMediator(LiveData<I> elementData, final UpdateFunction<I,R> updateFunction) {
         mUpdateMediatorLiveData.addSource(elementData, new Observer<I>() {
             @Override
-            public void onChanged(@Nullable I dataSource) {
+            public void onChanged(@Nullable final I dataSource) {
 
                 if(dataSource!=null) {
 
@@ -181,9 +180,23 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
 
                     }
 
-                    for(R oldData : oldMatchedDatas) {
+                    for(final R oldData : oldMatchedDatas) {
                         if(oldData != null ) {
-                            updateData(updateFunction.applyChange(dataSource,  oldData));
+                            long current  = System.currentTimeMillis();
+                            if(current > mCanUpdateTimeMill) {
+                                mCanUpdateTimeMill =current;
+                                updateData(updateFunction.applyChange(dataSource,  oldData));
+                            }else {
+                                long delay = mCanUpdateTimeMill - current;
+
+                                AsyncListUpdateDiffer.DIFF_MAIN_HANDLER.postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        updateData(updateFunction.applyChange(dataSource, oldData));
+                                    }
+                                }, delay);
+                            }
+                            mCanUpdateTimeMill += AsyncListUpdateDiffer.DELAY_STEP;
                         }
                     }
                 }

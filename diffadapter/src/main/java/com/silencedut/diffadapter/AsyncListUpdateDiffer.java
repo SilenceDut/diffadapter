@@ -30,7 +30,7 @@ class AsyncListUpdateDiffer<T extends BaseMutableData> {
     private final ListChangedCallback<T> mListChangedCallback;
 
 
-    private static final int DELAY_STEP = 40;
+    static final int DELAY_STEP = 5;
     @Nullable
     private List<T> mOldList;
     private long mMaxScheduledGeneration;
@@ -133,7 +133,7 @@ class AsyncListUpdateDiffer<T extends BaseMutableData> {
         syncGenerationAndList(newList);
         updateCurrentList(new ArrayList<>(newList));
         diffResult.dispatchUpdatesTo(this.mUpdateCallback);
-        mCanSyncTime = SystemClock.currentThreadTimeMillis() + newList.size()*DELAY_STEP / 10;
+        mCanSyncTime = SystemClock.currentThreadTimeMillis() + newList.size() * DELAY_STEP ;
     }
 
 
@@ -145,7 +145,7 @@ class AsyncListUpdateDiffer<T extends BaseMutableData> {
             syncGenerationAndList(oldDatas);
         }else {
             final long runGeneration =  AsyncListUpdateDiffer.this.mMaxScheduledGeneration;
-            long timeDelay = (this.mOldList!=null ? this.mOldList.size():0) * DELAY_STEP / 10 ;
+            long timeDelay = (this.mOldList!=null ? this.mOldList.size():0) * DELAY_STEP  ;
             DIFF_MAIN_HANDLER.postDelayed(new Runnable() {
                 @Override
                 public void run() {
