@@ -9,7 +9,6 @@ import android.support.v7.recyclerview.extensions.AsyncDifferConfig;
 import android.support.v7.util.AdapterListUpdateCallback;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.util.ListUpdateCallback;
-import android.util.Log;
 
 import com.silencedut.diffadapter.data.BaseMutableData;
 import com.silencedut.diffadapter.utils.ListChangedCallback;
@@ -30,8 +29,9 @@ class AsyncListUpdateDiffer<T extends BaseMutableData> {
     @Nullable
     private List<T> mOldList;
     private long mMaxScheduledGeneration;
+    private long mMaxSizeChangeGeneration;
     private long mCanSyncTime = 0;
-
+    private boolean mDiffing ;
     static final int DELAY_STEP = 5;
     static final Handler DIFF_MAIN_HANDLER = new Handler(Looper.getMainLooper());
 
@@ -51,6 +51,7 @@ class AsyncListUpdateDiffer<T extends BaseMutableData> {
 
     void submitList(@Nullable final List<T> newList) {
         final long runGeneration = ++this.mMaxScheduledGeneration;
+        mDiffing = true;
         if (newList != this.mOldList) {
             if (newList == null) {
                 int countRemoved = this.mOldList.size();
@@ -63,7 +64,7 @@ class AsyncListUpdateDiffer<T extends BaseMutableData> {
                 this.mUpdateCallback.onInserted(0, newList.size());
             } else {
                 final List<T> oldList = new ArrayList<>(this.mOldList);
-                Log.d(TAG,"oldList size"+oldList.size() +"new size"+newList.size() +"runGeneration"+runGeneration+"mMaxScheduledGeneration"+mMaxScheduledGeneration);
+
                 this.mConfig.getBackgroundThreadExecutor().execute(new Runnable() {
                     @Override
                     public void run() {
@@ -116,7 +117,7 @@ class AsyncListUpdateDiffer<T extends BaseMutableData> {
                         DIFF_MAIN_HANDLER.post(new Runnable() {
                             @Override
                             public void run() {
-                                Log.d(TAG,"oldList"+oldList.size() +"new size"+newList.size() +"runGeneration"+runGeneration+"mMaxScheduledGeneration"+mMaxScheduledGeneration);
+
                                 if (AsyncListUpdateDiffer.this.mMaxScheduledGeneration == runGeneration) {
                                     AsyncListUpdateDiffer.this.latchList(newList, result);
                                 }
@@ -128,39 +129,71 @@ class AsyncListUpdateDiffer<T extends BaseMutableData> {
         }
     }
 
-    private void latchList(@NonNull List<T> newList, @NonNull DiffUtil.DiffResult diffResult) {
-        syncGenerationAndList(newList);
-        updateCurrentList(new ArrayList<>(newList));
-        diffResult.dispatchUpdatesTo(this.mUpdateCallback);
-        mCanSyncTime = SystemClock.currentThreadTimeMillis() + newList.size() * DELAY_STEP ;
-    }
+    private void latchList(@NonNull final List<T> newList, @NonNull final DiffUtil.DiffResult diffResult) {
 
+        long currentTimeMillis = SystemClock.elapsedRealtime();
+        if(currentTimeMillis >= mCanSyncTime) {
 
-
-    void updateOldList(final @NonNull Runnable listSizeRunnable ,final List<T> oldDatas) {
-
-        if(SystemClock.currentThreadTimeMillis() >= mCanSyncTime) {
-            listSizeRunnable.run();
-            syncGenerationAndList(oldDatas);
-        }else {
-            final long runGeneration =  AsyncListUpdateDiffer.this.mMaxScheduledGeneration;
-            long timeDelay = (this.mOldList!=null ? this.mOldList.size():0) * DELAY_STEP ;
+            syncGenerationAndList(newList);
+            updateCurrentList(new ArrayList<>(newList));
+            diffResult.dispatchUpdatesTo(AsyncListUpdateDiffer.this.mUpdateCallback);
+            mDiffing = false;
+        } else {
+            final long runeGeneration = AsyncListUpdateDiffer.this.mMaxScheduledGeneration;
+            final long sizeGeneration = AsyncListUpdateDiffer.this.mMaxSizeChangeGeneration;
             DIFF_MAIN_HANDLER.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    if (AsyncListUpdateDiffer.this.mMaxScheduledGeneration == runGeneration) {
+
+                    if (AsyncListUpdateDiffer.this.mMaxScheduledGeneration == runeGeneration
+                            && AsyncListUpdateDiffer.this.mMaxSizeChangeGeneration == sizeGeneration) {
+
+                        syncGenerationAndList(newList);
+                        updateCurrentList(new ArrayList<>(newList));
+                        diffResult.dispatchUpdatesTo(AsyncListUpdateDiffer.this.mUpdateCallback);
+                    }
+                    mDiffing = false;
+                }
+            }, mCanSyncTime -currentTimeMillis );
+        }
+
+    }
+
+
+    void updateOldListSize(final @NonNull Runnable listSizeRunnable , final List<T> oldDatas) {
+        if(mDiffing) {
+            return;
+        }
+
+        long currentTimeMillis = SystemClock.elapsedRealtime();
+
+        if(currentTimeMillis >= mCanSyncTime) {
+
+            listSizeRunnable.run();
+            syncGenerationAndList(oldDatas);
+
+        }else {
+            final long sizeGeneration = AsyncListUpdateDiffer.this.mMaxSizeChangeGeneration;
+            final long runGeneration =  AsyncListUpdateDiffer.this.mMaxScheduledGeneration;
+            DIFF_MAIN_HANDLER.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+
+                    if (AsyncListUpdateDiffer.this.mMaxSizeChangeGeneration == sizeGeneration
+                            && runGeneration == AsyncListUpdateDiffer.this.mMaxScheduledGeneration) {
+
                         listSizeRunnable.run();
                         syncGenerationAndList(oldDatas);
                     }
                 }
-            }, timeDelay);
+            }, mCanSyncTime - currentTimeMillis );
         }
     }
 
-    private void syncGenerationAndList(List<T> oldData) {
-
+    private void syncGenerationAndList(@Nullable  List<T> oldData) {
         this.mOldList = oldData;
-        ++ this.mMaxScheduledGeneration;
+        mCanSyncTime = SystemClock.elapsedRealtime() + (oldData!=null?oldData.size() * DELAY_STEP:0) ;
+        ++AsyncListUpdateDiffer.this.mMaxSizeChangeGeneration;
     }
 
 }

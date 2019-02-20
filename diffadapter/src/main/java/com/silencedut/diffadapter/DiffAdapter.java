@@ -8,6 +8,7 @@ import android.arch.lifecycle.MediatorLiveData;
 import android.arch.lifecycle.Observer;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -183,7 +184,7 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
 
                     for(final R oldData : oldMatchedDatas) {
                         if(oldData != null ) {
-                            long current  = System.currentTimeMillis();
+                            long current  = SystemClock.elapsedRealtime();
                             if(current > mCanUpdateTimeMill || getItemCount() < UPDATE_DELAY_THRESHOLD) {
 
                                 updateData(updateFunction.applyChange(dataSource,  oldData));
@@ -226,7 +227,7 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
             return;
         }
 
-        mDifferHelper.updateOldList(new Runnable() {
+        mDifferHelper.updateOldListSize(new Runnable() {
             @Override
             public void run() {
                 mDatas.add(data);
@@ -243,7 +244,7 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
             return;
         }
 
-        mDifferHelper.updateOldList(new Runnable() {
+        mDifferHelper.updateOldListSize(new Runnable() {
             @Override
             public void run() {
                 Iterator<BaseMutableData> iterator = mDatas.iterator();
@@ -267,7 +268,7 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
             return;
         }
 
-        mDifferHelper.updateOldList(new Runnable() {
+        mDifferHelper.updateOldListSize(new Runnable() {
             @Override
             public void run() {
                 Iterator<BaseMutableData> iterator = mDatas.iterator();
@@ -283,9 +284,7 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
                     deleteSize++;
                 }
 
-
                 notifyItemRangeRemoved(startPosition, deleteSize);
-
             }
         },mDatas);
 
@@ -296,7 +295,7 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
             return;
         }
 
-        mDifferHelper.updateOldList(new Runnable() {
+        mDifferHelper.updateOldListSize(new Runnable() {
             @Override
             public void run() {
                 mDatas.addAll(startPosition,datas);

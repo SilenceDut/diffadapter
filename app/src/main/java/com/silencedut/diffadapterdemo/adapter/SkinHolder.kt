@@ -36,7 +36,7 @@ class SkinHolder(itemView: View, recyclerAdapter: DiffAdapter): BaseDiffViewHold
     }
 
     override fun updateItem(data: SkinViewData, position: Int) {
-        Log.d(TAG,"updateItem $data")
+        Log.d(TAG,"updateItem ${data.id}")
         data.legendIcon?.let {
             Picasso.get().load(it).into(legendIcon)
         }

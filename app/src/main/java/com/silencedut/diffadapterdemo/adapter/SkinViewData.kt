@@ -1,5 +1,6 @@
 package com.silencedut.diffadapterdemo.adapter
 
+import android.util.Log
 import com.silencedut.core.provider.legend.pojo.LegendSkin
 import com.silencedut.diffadapter.data.BaseMutableData
 import com.silencedut.diffadapterdemo.R
@@ -8,7 +9,7 @@ import com.silencedut.diffadapterdemo.R
  * @author SilenceDut
  * @date 2018/12/5
  */
-class SkinViewData(var id: Long, var legendIcon:String?,var legendSkin: LegendSkin?) : BaseMutableData<SkinViewData>() {
+data class SkinViewData(var id: Long, var legendIcon:String?,var legendSkin: LegendSkin?) : BaseMutableData<SkinViewData>() {
 
     companion object {
          const val VIEW_ID = R.layout.holder_skins
@@ -27,7 +28,9 @@ class SkinViewData(var id: Long, var legendIcon:String?,var legendSkin: LegendSk
     }
 
     override fun areUISame(newData: SkinViewData): Boolean {
-        return this.legendIcon == newData.legendIcon && this.legendSkin?.equals(newData.legendSkin)?:false
+        val uiSame =  this.legendIcon == newData.legendIcon && this.legendSkin?.equals(newData.legendSkin)?:false
+        Log.d("SkinViewData","areUISame $uiSame ${newData.id}")
+        return uiSame
     }
 
     override fun uniqueItemFeature(): Any {

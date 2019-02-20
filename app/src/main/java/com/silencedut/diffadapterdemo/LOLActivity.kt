@@ -13,6 +13,7 @@ import android.widget.Toast
 import com.silencedut.core.Transfer
 import com.silencedut.core.provider.legend.ILegendDateProvider
 import com.silencedut.diffadapter.DiffAdapter
+import com.silencedut.diffadapter.data.BaseMutableData
 import com.silencedut.diffadapter.rvhelper.RvHelper
 import com.silencedut.diffadapter.utils.DiffModelProvider
 import com.silencedut.diffadapterdemo.adapter.LegendHolder
@@ -21,6 +22,7 @@ import com.silencedut.diffadapterdemo.adapter.SkinHolder
 import com.silencedut.diffadapterdemo.adapter.SkinViewData
 import com.silencedut.taskscheduler.TaskScheduler
 import java.util.*
+import kotlin.collections.ArrayList
 
 /**
  * @author SilenceDut
@@ -55,7 +57,20 @@ class LOLActivity : AppCompatActivity(){
         legendViewModel.addUpdateMediator(diffAdapter)
 
         legendViewModel.legendsData.observeForever{
-            diffAdapter.datas = it
+
+            if (it != null) {
+                val list = mutableListOf<BaseMutableData<*>>()
+                list.addAll(it)
+                list.addAll(it)
+                list.addAll(it)
+                list.addAll(it)
+                list.addAll(it)
+                list.addAll(it)
+                list.addAll(it)
+                list.addAll(it)
+                diffAdapter.datas = list
+            }
+
         }
 
         findViewById<View>(R.id.fetch_data).setOnClickListener {
@@ -82,6 +97,7 @@ class LOLActivity : AppCompatActivity(){
 
                 val newList = ArrayList(diffAdapter.datas.subList(0,insertSize))
                 diffAdapter.insertData(insertIndex,newList)
+                Toast.makeText(this,"现在多少条："+diffAdapter.itemCount,Toast.LENGTH_SHORT).show()
             }
 
         }
@@ -118,7 +134,7 @@ class LOLActivity : AppCompatActivity(){
                                 }
                                 val oneLegend = Transfer.getImpl(ILegendDateProvider::class.java).fetchOneLegends()
                                 diffAdapter.addData(legendViewModel.convertToAdapterData(oneLegend))
-                                val time = (200 until 400L).random()
+                                val time = (100 until 200L).random()
                                 it.postDelayed(this, time)
                             }
                         })
@@ -129,7 +145,7 @@ class LOLActivity : AppCompatActivity(){
                                     return
                                 }
                                 legendViewModel.fetchLegends()
-                                val time = (200 until 500L).random()
+                                val time = (100 until 200L).random()
                                 it.postDelayed(this, time)
                             }
                         })
@@ -150,7 +166,15 @@ class LOLActivity : AppCompatActivity(){
 
 
                                 }
-                                val time = (1000 until 1500L).random()
+                                val time = (200 until 350L).random()
+                                it.postDelayed(this, time)
+                            }
+                        })
+
+                        it.post(object :Runnable{
+                            override fun run() {
+                                diffAdapter.clear()
+                                val time = (300 until 450L).random()
                                 it.postDelayed(this, time)
                             }
                         })
@@ -166,7 +190,8 @@ class LOLActivity : AppCompatActivity(){
                                     diffAdapter.deleteData(deleteIndex, deleteSize)
 
                                 }
-                                val time = (1000 until 3000L).random()
+
+                                val time = (100 until 300L).random()
                                 it.postDelayed(this, time)
                             }
                         })
@@ -180,7 +205,7 @@ class LOLActivity : AppCompatActivity(){
                                     RvHelper.scrollToBottom(it,(0 until diffAdapter.itemCount).random())
                                 }
 
-                                val time = (1000 until 1500L).random()
+                                val time = (300 until 500L).random()
                                 it.postDelayed(this, time)
                             }
                         })
@@ -241,11 +266,6 @@ class LOLActivity : AppCompatActivity(){
             Log.d(TAG,"exception on random",e)
         }
         return 0
-    }
-
-    override fun onStop() {
-        super.onStop()
-//        endTest()
     }
 
 
