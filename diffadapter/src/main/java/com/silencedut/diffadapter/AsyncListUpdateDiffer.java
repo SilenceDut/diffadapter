@@ -14,7 +14,9 @@ import com.silencedut.diffadapter.data.BaseMutableData;
 import com.silencedut.diffadapter.utils.ListChangedCallback;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  *
@@ -31,7 +33,7 @@ class AsyncListUpdateDiffer<T extends BaseMutableData> {
     private long mMaxScheduledGeneration;
     private long mMaxSizeChangeGeneration;
     private long mCanSyncTime = 0;
-    private boolean mDiffing ;
+    private Set<Long> mGenerations = new HashSet<>();
     static final int DELAY_STEP = 5;
     static final Handler DIFF_MAIN_HANDLER = new Handler(Looper.getMainLooper());
 
@@ -51,93 +53,101 @@ class AsyncListUpdateDiffer<T extends BaseMutableData> {
 
     void submitList(@Nullable final List<T> newList) {
         final long runGeneration = ++this.mMaxScheduledGeneration;
-        mDiffing = true;
+        mGenerations.add(runGeneration);
+
         if (newList != this.mOldList) {
             if (newList == null) {
                 int countRemoved = this.mOldList.size();
                 syncGenerationAndList(null);
                 updateCurrentList(new ArrayList<T>());
                 this.mUpdateCallback.onRemoved(0, countRemoved);
+                mGenerations.remove(runGeneration);
             } else if (this.mOldList == null) {
                 syncGenerationAndList(newList);
                 updateCurrentList(new ArrayList<>(newList));
                 this.mUpdateCallback.onInserted(0, newList.size());
+                mGenerations.remove(runGeneration);
             } else {
-                final List<T> oldList = new ArrayList<>(this.mOldList);
-
-                this.mConfig.getBackgroundThreadExecutor().execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        final DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffUtil.Callback() {
-                            @Override
-                            public int getOldListSize() {
-                                return oldList.size();
-                            }
-                            @Override
-                            public int getNewListSize() {
-                                return newList.size();
-                            }
-                            @Override
-                            public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
-
-                                T oldItem = oldList.get(oldItemPosition);
-                                T newItem = newList.get(newItemPosition);
-                                if(oldItem == null || newItem == null) {
-                                    return false;
-                                }
-                                if(oldItem.getItemViewId()!=newItem.getItemViewId() || oldItem.getClass() != newItem.getClass()) {
-                                    return false;
-                                }
-                                return AsyncListUpdateDiffer.this.mConfig.getDiffCallback().areItemsTheSame(oldItem, newItem);
-                            }
-
-                            @Override
-                            public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-
-                                T oldItem = oldList.get(oldItemPosition);
-                                T newItem = newList.get(newItemPosition);
-                                if (oldItem != null && newItem != null &&  oldItem.getClass() == newItem.getClass() ) {
-                                    return AsyncListUpdateDiffer.this.mConfig.getDiffCallback().areContentsTheSame(oldItem, newItem);
-                                } else  {
-                                    return oldItem == null && newItem == null;
-                                }
-                            }
-                            @Override
-                            @Nullable
-                            public Object getChangePayload(int oldItemPosition, int newItemPosition) {
-                                T oldItem = oldList.get(oldItemPosition);
-                                T newItem = newList.get(newItemPosition);
-                                if (oldItem != null && newItem != null && oldItem.getClass() == newItem.getClass()) {
-                                    return AsyncListUpdateDiffer.this.mConfig.getDiffCallback().getChangePayload(oldItem, newItem);
-                                } else {
-                                    return null;
-                                }
-                            }
-                        });
-                        DIFF_MAIN_HANDLER.post(new Runnable() {
-                            @Override
-                            public void run() {
-
-                                if (AsyncListUpdateDiffer.this.mMaxScheduledGeneration == runGeneration) {
-                                    AsyncListUpdateDiffer.this.latchList(newList, result);
-                                }
-                            }
-                        });
-                    }
-                });
+                doDiff(newList,runGeneration);
             }
         }
     }
 
-    private void latchList(@NonNull final List<T> newList, @NonNull final DiffUtil.DiffResult diffResult) {
+    private void doDiff(@NonNull final List<T> newList,final long runGeneration) {
+        final List<T> oldList = new ArrayList<>(this.mOldList);
 
-        long currentTimeMillis = SystemClock.elapsedRealtime();
-        if(currentTimeMillis >= mCanSyncTime) {
+        this.mConfig.getBackgroundThreadExecutor().execute(new Runnable() {
+            @Override
+            public void run() {
+                final DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffUtil.Callback() {
+                    @Override
+                    public int getOldListSize() {
+                        return oldList.size();
+                    }
+                    @Override
+                    public int getNewListSize() {
+                        return newList.size();
+                    }
+                    @Override
+                    public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
+
+                        T oldItem = oldList.get(oldItemPosition);
+                        T newItem = newList.get(newItemPosition);
+                        if(oldItem == null || newItem == null) {
+                            return false;
+                        }
+                        if(oldItem.getItemViewId()!=newItem.getItemViewId() || oldItem.getClass() != newItem.getClass()) {
+                            return false;
+                        }
+                        return AsyncListUpdateDiffer.this.mConfig.getDiffCallback().areItemsTheSame(oldItem, newItem);
+                    }
+
+                    @Override
+                    public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
+
+                        T oldItem = oldList.get(oldItemPosition);
+                        T newItem = newList.get(newItemPosition);
+                        if (oldItem != null && newItem != null &&  oldItem.getClass() == newItem.getClass() ) {
+                            return AsyncListUpdateDiffer.this.mConfig.getDiffCallback().areContentsTheSame(oldItem, newItem);
+                        } else  {
+                            return oldItem == null && newItem == null;
+                        }
+                    }
+                    @Override
+                    @Nullable
+                    public Object getChangePayload(int oldItemPosition, int newItemPosition) {
+                        T oldItem = oldList.get(oldItemPosition);
+                        T newItem = newList.get(newItemPosition);
+                        if (oldItem != null && newItem != null && oldItem.getClass() == newItem.getClass()) {
+                            return AsyncListUpdateDiffer.this.mConfig.getDiffCallback().getChangePayload(oldItem, newItem);
+                        } else {
+                            return null;
+                        }
+                    }
+                });
+                DIFF_MAIN_HANDLER.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (AsyncListUpdateDiffer.this.mMaxScheduledGeneration == runGeneration) {
+                            AsyncListUpdateDiffer.this.latchList(newList, result,runGeneration);
+                        } else {
+                            mGenerations.remove(runGeneration);
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    private void latchList(@NonNull final List<T> newList, @NonNull final DiffUtil.DiffResult diffResult,final long runGeneration) {
+
+        long needDelay = mCanSyncTime - SystemClock.elapsedRealtime() ;
+        if(needDelay <= 0) {
 
             syncGenerationAndList(newList);
             updateCurrentList(new ArrayList<>(newList));
             diffResult.dispatchUpdatesTo(AsyncListUpdateDiffer.this.mUpdateCallback);
-            mDiffing = false;
+            mGenerations.remove(runGeneration);
         } else {
             final long runeGeneration = AsyncListUpdateDiffer.this.mMaxScheduledGeneration;
             final long sizeGeneration = AsyncListUpdateDiffer.this.mMaxSizeChangeGeneration;
@@ -151,17 +161,18 @@ class AsyncListUpdateDiffer<T extends BaseMutableData> {
                         syncGenerationAndList(newList);
                         updateCurrentList(new ArrayList<>(newList));
                         diffResult.dispatchUpdatesTo(AsyncListUpdateDiffer.this.mUpdateCallback);
+
                     }
-                    mDiffing = false;
+                    mGenerations.remove(runGeneration);
                 }
-            }, mCanSyncTime -currentTimeMillis );
+            }, needDelay );
         }
 
     }
 
 
     void updateOldListSize(final @NonNull Runnable listSizeRunnable , final List<T> oldDatas) {
-        if(mDiffing) {
+        if(mGenerations.size() > 0) {
             return;
         }
 
