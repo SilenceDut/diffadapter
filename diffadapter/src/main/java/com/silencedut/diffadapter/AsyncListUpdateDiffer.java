@@ -31,7 +31,6 @@ class AsyncListUpdateDiffer<T extends BaseMutableData> {
     @Nullable
     private List<T> mOldList;
     private long mMaxScheduledGeneration;
-    private long mMaxSizeChangeGeneration;
     private long mCanSyncTime = 0;
     private Set<Long> mGenerations = new HashSet<>();
     static final int DELAY_STEP = 5;
@@ -125,7 +124,7 @@ class AsyncListUpdateDiffer<T extends BaseMutableData> {
                         }
                     }
                 });
-                DIFF_MAIN_HANDLER.post(new Runnable() {
+                DIFF_MAIN_HANDLER.post( new Runnable() {
                     @Override
                     public void run() {
                         if (AsyncListUpdateDiffer.this.mMaxScheduledGeneration == runGeneration) {
@@ -148,15 +147,15 @@ class AsyncListUpdateDiffer<T extends BaseMutableData> {
             updateCurrentList(new ArrayList<>(newList));
             diffResult.dispatchUpdatesTo(AsyncListUpdateDiffer.this.mUpdateCallback);
             mGenerations.remove(runGeneration);
+
         } else {
             final long runeGeneration = AsyncListUpdateDiffer.this.mMaxScheduledGeneration;
-            final long sizeGeneration = AsyncListUpdateDiffer.this.mMaxSizeChangeGeneration;
+
             DIFF_MAIN_HANDLER.postDelayed(new Runnable() {
                 @Override
                 public void run() {
 
-                    if (AsyncListUpdateDiffer.this.mMaxScheduledGeneration == runeGeneration
-                            && AsyncListUpdateDiffer.this.mMaxSizeChangeGeneration == sizeGeneration) {
+                    if (AsyncListUpdateDiffer.this.mMaxScheduledGeneration == runeGeneration) {
 
                         syncGenerationAndList(newList);
                         updateCurrentList(new ArrayList<>(newList));
@@ -184,14 +183,12 @@ class AsyncListUpdateDiffer<T extends BaseMutableData> {
             syncGenerationAndList(oldDatas);
 
         }else {
-            final long sizeGeneration = AsyncListUpdateDiffer.this.mMaxSizeChangeGeneration;
             final long runGeneration =  AsyncListUpdateDiffer.this.mMaxScheduledGeneration;
             DIFF_MAIN_HANDLER.postDelayed(new Runnable() {
                 @Override
                 public void run() {
 
-                    if (AsyncListUpdateDiffer.this.mMaxSizeChangeGeneration == sizeGeneration
-                            && runGeneration == AsyncListUpdateDiffer.this.mMaxScheduledGeneration) {
+                    if ( runGeneration == AsyncListUpdateDiffer.this.mMaxScheduledGeneration) {
 
                         listSizeRunnable.run();
                         syncGenerationAndList(oldDatas);
@@ -204,7 +201,6 @@ class AsyncListUpdateDiffer<T extends BaseMutableData> {
     private void syncGenerationAndList(@Nullable  List<T> oldData) {
         this.mOldList = oldData;
         mCanSyncTime = SystemClock.elapsedRealtime() + (oldData!=null?oldData.size() * DELAY_STEP:0) ;
-        ++AsyncListUpdateDiffer.this.mMaxSizeChangeGeneration;
     }
 
 }
