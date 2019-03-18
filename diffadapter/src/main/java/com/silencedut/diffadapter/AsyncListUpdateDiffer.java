@@ -45,9 +45,6 @@ class AsyncListUpdateDiffer<T extends BaseMutableData> {
         updateCurrentList(new ArrayList<T>());
     }
 
-    private void updateCurrentList(List<T> currentList) {
-        this.mListChangedCallback.onListChanged(currentList);
-    }
 
 
     void submitList(@Nullable final List<T> newList) {
@@ -57,12 +54,13 @@ class AsyncListUpdateDiffer<T extends BaseMutableData> {
         if (newList != this.mOldList) {
             if (newList == null) {
                 int countRemoved = this.mOldList.size();
-                syncGenerationAndList(null);
+                syncOldList(null);
                 updateCurrentList(new ArrayList<T>());
                 this.mUpdateCallback.onRemoved(0, countRemoved);
                 mGenerations.remove(runGeneration);
             } else if (this.mOldList == null) {
-                syncGenerationAndList(newList);
+                syncOldList(newList);
+                updateSyncTime(newList);
                 updateCurrentList(new ArrayList<>(newList));
                 this.mUpdateCallback.onInserted(0, newList.size());
                 mGenerations.remove(runGeneration);
@@ -143,7 +141,8 @@ class AsyncListUpdateDiffer<T extends BaseMutableData> {
         long needDelay = mCanSyncTime - SystemClock.elapsedRealtime() ;
         if(needDelay <= 0) {
 
-            syncGenerationAndList(newList);
+            syncOldList(newList);
+            updateSyncTime(newList);
             updateCurrentList(new ArrayList<>(newList));
             diffResult.dispatchUpdatesTo(AsyncListUpdateDiffer.this.mUpdateCallback);
             mGenerations.remove(runGeneration);
@@ -157,7 +156,8 @@ class AsyncListUpdateDiffer<T extends BaseMutableData> {
 
                     if (AsyncListUpdateDiffer.this.mMaxScheduledGeneration == runeGeneration) {
 
-                        syncGenerationAndList(newList);
+                        syncOldList(newList);
+                        updateSyncTime(newList);
                         updateCurrentList(new ArrayList<>(newList));
                         diffResult.dispatchUpdatesTo(AsyncListUpdateDiffer.this.mUpdateCallback);
 
@@ -180,7 +180,7 @@ class AsyncListUpdateDiffer<T extends BaseMutableData> {
         if(currentTimeMillis >= mCanSyncTime) {
 
             listSizeRunnable.run();
-            syncGenerationAndList(oldDatas);
+            syncOldList(oldDatas);
 
         }else {
             final long runGeneration =  AsyncListUpdateDiffer.this.mMaxScheduledGeneration;
@@ -188,18 +188,25 @@ class AsyncListUpdateDiffer<T extends BaseMutableData> {
                 @Override
                 public void run() {
 
-                    if ( runGeneration == AsyncListUpdateDiffer.this.mMaxScheduledGeneration) {
+                    if (runGeneration == AsyncListUpdateDiffer.this.mMaxScheduledGeneration) {
 
                         listSizeRunnable.run();
-                        syncGenerationAndList(oldDatas);
+                        syncOldList(oldDatas);
                     }
                 }
             }, mCanSyncTime - currentTimeMillis );
         }
     }
 
-    private void syncGenerationAndList(@Nullable  List<T> oldData) {
+    private void updateCurrentList(List<T> currentList) {
+        this.mListChangedCallback.onListChanged(currentList);
+    }
+
+    private void syncOldList(@Nullable  List<T> oldData) {
         this.mOldList = oldData;
+    }
+
+    private void updateSyncTime(@Nullable  List<T> oldData) {
         mCanSyncTime = SystemClock.elapsedRealtime() + (oldData!=null?oldData.size() * DELAY_STEP:0) ;
     }
 
