@@ -1,11 +1,15 @@
 package com.silencedut.diffadapter;
 
+import android.arch.lifecycle.GenericLifecycleObserver;
+import android.arch.lifecycle.Lifecycle;
 import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MediatorLiveData;
 import android.arch.lifecycle.Observer;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -56,7 +60,7 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
     private MediatorLiveData<Boolean> mUpdateMediatorLiveData = new MediatorLiveData<>();
     private long mCanUpdateTimeMill;
     private static final int UPDATE_DELAY_THRESHOLD = 100;
-
+    Handler mDiffHandler = new Handler(Looper.getMainLooper());
     public Fragment attachedFragment;
     public Context mContext;
 
@@ -81,6 +85,18 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
             }
         });
 
+        mLifecycleOwner.getLifecycle().addObserver(new GenericLifecycleObserver() {
+            @Override
+            public void onStateChanged(LifecycleOwner source, Lifecycle.Event event) {
+                if(event == Lifecycle.Event.ON_DESTROY) {
+                    if(mLifecycleOwner != null ) {
+                        mLifecycleOwner.getLifecycle().removeObserver(this);
+                    }
+                    Log.d(TAG,"latchList removeCallbacksAndMessages");
+                    mDiffHandler.removeCallbacksAndMessages(null);
+                }
+            }
+        });
 
 
         mDifferHelper = new AsyncListUpdateDiffer<>(this, new ListChangedCallback<BaseMutableData>() {
@@ -178,7 +194,7 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
                             }else {
                                 long delay = mCanUpdateTimeMill - current;
 
-                                AsyncListUpdateDiffer.DIFF_MAIN_HANDLER.postDelayed(new Runnable() {
+                                mDiffHandler.postDelayed(new Runnable() {
                                     @Override
                                     public void run() {
                                         updateData(updateFunction.applyChange(dataSource, oldData));

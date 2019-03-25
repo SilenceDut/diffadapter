@@ -1,7 +1,6 @@
 package com.silencedut.diffadapter;
 
 import android.os.Handler;
-import android.os.Looper;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -35,11 +34,10 @@ class AsyncListUpdateDiffer<T extends BaseMutableData> {
     private long mCanSyncTime = 0;
     private Set<Long> mGenerations = new HashSet<>();
     static final int DELAY_STEP = 5;
-    static final Handler DIFF_MAIN_HANDLER = new Handler(Looper.getMainLooper());
-
+    private Handler mDiffHandler;
 
     AsyncListUpdateDiffer(@NonNull DiffAdapter adapter, @NonNull ListChangedCallback<T> listChangedCallback, @NonNull DiffUtil.ItemCallback<T> diffCallback) {
-
+        this.mDiffHandler = adapter.mDiffHandler;
         this.mUpdateCallback = new AdapterListUpdateCallback(adapter);
         this.mConfig = new AsyncDifferConfig.Builder<>(diffCallback).build();
         this.mListChangedCallback = listChangedCallback;
@@ -125,7 +123,7 @@ class AsyncListUpdateDiffer<T extends BaseMutableData> {
                         }
                     }
                 });
-                DIFF_MAIN_HANDLER.post( new Runnable() {
+                mDiffHandler.post( new Runnable() {
                     @Override
                     public void run() {
                         if (AsyncListUpdateDiffer.this.mMaxScheduledGeneration == runGeneration) {
@@ -155,7 +153,7 @@ class AsyncListUpdateDiffer<T extends BaseMutableData> {
 
         } else {
 
-            DIFF_MAIN_HANDLER.postDelayed(new Runnable() {
+            mDiffHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
 
@@ -190,7 +188,7 @@ class AsyncListUpdateDiffer<T extends BaseMutableData> {
 
         }else {
             final long runGeneration =  AsyncListUpdateDiffer.this.mMaxScheduledGeneration;
-            DIFF_MAIN_HANDLER.postDelayed(new Runnable() {
+            mDiffHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
 
