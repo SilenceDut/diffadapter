@@ -91,7 +91,9 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
                         mLifecycleOwner.getLifecycle().removeObserver(this);
                     }
                     Log.d(TAG,"latchList removeCallbacksAndMessages");
-                    AsyncListUpdateDiffer.DIFF_MAIN_HANDLER.removeCallbacksAndMessages(null);
+                    if(mDifferHelper!=null) {
+                        mDifferHelper.clear();
+                    }
                 }
             }
 
