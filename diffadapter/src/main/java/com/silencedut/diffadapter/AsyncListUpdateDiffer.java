@@ -216,9 +216,5 @@ class AsyncListUpdateDiffer<T extends BaseMutableData> {
         mCanSyncTime = SystemClock.elapsedRealtime() + (oldData!=null?oldData.size() * DELAY_STEP:0) ;
     }
 
-    void clear() {
-        mGenerations.clear();
-        AsyncListUpdateDiffer.DIFF_MAIN_HANDLER.removeCallbacksAndMessages(null);
-    }
 
 }

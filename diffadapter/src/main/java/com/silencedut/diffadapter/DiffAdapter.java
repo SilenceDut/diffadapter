@@ -1,7 +1,5 @@
 package com.silencedut.diffadapter;
 
-import android.arch.lifecycle.GenericLifecycleObserver;
-import android.arch.lifecycle.Lifecycle;
 import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MediatorLiveData;
@@ -83,21 +81,6 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
             }
         });
 
-        mLifecycleOwner.getLifecycle().addObserver(new GenericLifecycleObserver() {
-            @Override
-            public void onStateChanged(LifecycleOwner source, Lifecycle.Event event) {
-                if(event == Lifecycle.Event.ON_DESTROY) {
-                    if(mLifecycleOwner != null ) {
-                        mLifecycleOwner.getLifecycle().removeObserver(this);
-                    }
-                    Log.d(TAG,"latchList removeCallbacksAndMessages");
-                    if(mDifferHelper!=null) {
-                        mDifferHelper.clear();
-                    }
-                }
-            }
-
-        });
 
 
         mDifferHelper = new AsyncListUpdateDiffer<>(this, new ListChangedCallback<BaseMutableData>() {
