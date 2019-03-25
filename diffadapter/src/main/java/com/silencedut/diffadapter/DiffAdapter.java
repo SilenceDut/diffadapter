@@ -87,9 +87,10 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
             @Override
             public void onStateChanged(LifecycleOwner source, Lifecycle.Event event) {
                 if(event == Lifecycle.Event.ON_DESTROY) {
-                    if(mLifecycleOwner!=null ) {
+                    if(mLifecycleOwner != null ) {
                         mLifecycleOwner.getLifecycle().removeObserver(this);
                     }
+                    Log.d(TAG,"latchList removeCallbacksAndMessages");
                     AsyncListUpdateDiffer.DIFF_MAIN_HANDLER.removeCallbacksAndMessages(null);
                 }
             }
@@ -429,6 +430,7 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
 
     /**
      * 当前显示在列表中的数据，和{@link #setDatas(List)}里的数据大小可能不一样，由于DiffUtil可能还在计算的问题
+     * 通过提供的接口来改变数据
      */
     public List<BaseMutableData> getDatas() {
         return mDatas;

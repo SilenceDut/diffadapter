@@ -9,6 +9,7 @@ import android.support.v7.recyclerview.extensions.AsyncDifferConfig;
 import android.support.v7.util.AdapterListUpdateCallback;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.util.ListUpdateCallback;
+import android.util.Log;
 
 import com.silencedut.diffadapter.data.BaseMutableData;
 import com.silencedut.diffadapter.utils.ListChangedCallback;
@@ -58,12 +59,14 @@ class AsyncListUpdateDiffer<T extends BaseMutableData> {
                 updateCurrentList(new ArrayList<T>());
                 this.mUpdateCallback.onRemoved(0, countRemoved);
                 mGenerations.remove(runGeneration);
+                Log.d(TAG,"latchList submitList newList == null runGeneration :"+runGeneration);
             } else if (this.mOldList == null) {
                 syncOldList(newList);
                 updateSyncTime(newList);
                 updateCurrentList(new ArrayList<>(newList));
                 this.mUpdateCallback.onInserted(0, newList.size());
                 mGenerations.remove(runGeneration);
+                Log.d(TAG,"latchList submitList mOldList == null runGeneration :"+runGeneration);
             } else {
                 doDiff(newList,runGeneration);
             }
@@ -127,7 +130,9 @@ class AsyncListUpdateDiffer<T extends BaseMutableData> {
                     public void run() {
                         if (AsyncListUpdateDiffer.this.mMaxScheduledGeneration == runGeneration) {
                             AsyncListUpdateDiffer.this.latchList(newList, result,runGeneration);
+                            Log.d(TAG,"latchList doDiff runGeneration :"+runGeneration);
                         } else {
+                            Log.d(TAG,"latchList doDiff else runGeneration :"+runGeneration);
                             mGenerations.remove(runGeneration);
                         }
                     }
@@ -146,15 +151,15 @@ class AsyncListUpdateDiffer<T extends BaseMutableData> {
             updateCurrentList(new ArrayList<>(newList));
             diffResult.dispatchUpdatesTo(AsyncListUpdateDiffer.this.mUpdateCallback);
             mGenerations.remove(runGeneration);
+            Log.d(TAG,"latchList needDelay <= 0 runGeneration :"+runGeneration);
 
         } else {
-            final long runeGeneration = AsyncListUpdateDiffer.this.mMaxScheduledGeneration;
 
             DIFF_MAIN_HANDLER.postDelayed(new Runnable() {
                 @Override
                 public void run() {
 
-                    if (AsyncListUpdateDiffer.this.mMaxScheduledGeneration == runeGeneration) {
+                    if (AsyncListUpdateDiffer.this.mMaxScheduledGeneration == runGeneration) {
 
                         syncOldList(newList);
                         updateSyncTime(newList);
@@ -162,6 +167,7 @@ class AsyncListUpdateDiffer<T extends BaseMutableData> {
                         diffResult.dispatchUpdatesTo(AsyncListUpdateDiffer.this.mUpdateCallback);
 
                     }
+                    Log.d(TAG,"latchList else runGeneration :"+runGeneration);
                     mGenerations.remove(runGeneration);
                 }
             }, needDelay );
