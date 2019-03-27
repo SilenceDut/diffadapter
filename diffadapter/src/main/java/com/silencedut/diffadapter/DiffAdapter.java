@@ -33,6 +33,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -434,7 +435,7 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
      * 通过提供的接口来改变数据
      */
     public List<BaseMutableData> getDatas() {
-        return mDatas;
+        return Collections.unmodifiableList(mDatas);
     }
 
 
