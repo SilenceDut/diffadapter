@@ -446,7 +446,12 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
 
     @Override
     public int getItemViewType(int position) {
-        return mDatas.get(position).getItemViewId();
+
+        if(mDatas.get(position)!=null) {
+            return mDatas.get(position).getItemViewId();
+        }
+
+        return 0;
     }
 
 }
