@@ -43,10 +43,10 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    compileOnly "com.android.support:appcompat-v7:$_supportVersion"
-    compileOnly "com.android.support:recyclerview-v7:$_supportVersion"
-    compileOnly "android.arch.lifecycle:extensions:$lifecycle_extensions"
-    compileOnly "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation "com.android.support:appcompat-v7:$_supportVersion"
+    implementation "com.android.support:recyclerview-v7:$_supportVersion"
+    implementation "android.arch.lifecycle:extensions:$lifecycle_extensions"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
 repositories {
     mavenCentral()
