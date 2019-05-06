@@ -318,7 +318,7 @@ allprojects {
 
 ```java
 dependencies {
-    implementation 'com.github.silencedut.diffadapter:latestVersion'
+    implementation 'com.github.silencedut:diffadapter:latestVersion'
 }
 ```
 
