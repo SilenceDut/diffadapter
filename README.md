@@ -43,8 +43,9 @@ class AnyViewData(var id : Long ,var any : String) : BaseMutableData<AnyViewData
     }
     
     override fun areUISame(newData: AnyViewData): Boolean {
-        // 判断新旧数据是否展示相同的UI,如果返回True,则表示UI不需要改变，不会updateItem
-       
+         // 判断新旧数据是否展示相同的UI,如果返回True,则表示UI不需要改变，不会updateItem,可以理解为
+        如果新数据newData是什么样才不需要更新UI
+
         return this.any == newData.any
     }
 
