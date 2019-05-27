@@ -89,7 +89,7 @@ recyclerView.adapter = diffAdapter
 
 //监听数据变化
 
-fun onDatached(datas : List<BaseMutableData<*>>) {
+fun onFetchedData(datas : List<BaseMutableData<*>>) {
     diffAdapter.datas = adapterListData
 }
 
