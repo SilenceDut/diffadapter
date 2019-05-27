@@ -49,7 +49,7 @@ class AnyViewData(var id : Long ,var any : String) : BaseMutableData<AnyViewData
     }
 
     override fun uniqueItemFeature(): Any {
-        // 返回可以标识这个Item的特征，比如uid,id等,用来做UI差分已经可以动态
+        // 返回可以标识这个Item的特征，比如uid,id等,用来做UI差分已经可以动态更改单个item查找的条件
         return this.id
     }
     
