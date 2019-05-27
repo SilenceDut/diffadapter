@@ -203,9 +203,10 @@ interface UpdateFunction<I,R extends BaseMutableData> {
      */
     Object MATCH_ALL = new Object();
 
+   
     /**
      * 提供一个特征，用来查找列表数据中和此特征相同的数据
-     * @param input 用来提供查找数据和最终改变列表的数据
+     * @param input 用来提供查找数据和最终改变列表的数据 ,最终匹配的是allMatchFeatures里的数据，默认情况下就是uniqueItemFeature()
      * @return 用来查找列表中的数据的特征项
      */
     Object providerMatchFeature(@NonNull I input);
