@@ -242,6 +242,31 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
     }
 
 
+    public void deleteData(final Object uniqueItemFeature) {
+        if (uniqueItemFeature == null) {
+            return;
+        }
+
+        mDifferHelper.updateOldListSize(new Runnable() {
+            @Override
+            public void run() {
+                Iterator<BaseMutableData> iterator = mDatas.iterator();
+
+                int position = -1;
+                while (iterator.hasNext()) {
+                    position ++;
+
+                    if(uniqueItemFeature.equals(iterator.next().uniqueItemFeature())) {
+                        iterator.remove();
+                        break;
+                    }
+                }
+                notifyItemRemoved(position);
+            }
+        },mDatas);
+    }
+
+
     public void deleteData(final BaseMutableData data) {
         if (data == null) {
             return;
@@ -408,7 +433,7 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
     }
 
 
-    private  <T extends BaseMutableData> List<T> getMatchedData(Object matchChangeFeature,Class cls) {
+    public   <T extends BaseMutableData> List<T> getMatchedData(Object matchChangeFeature,Class cls) {
         List<T> matchedMutableData = new ArrayList<>();
         for(BaseMutableData baseMutableData : mDatas) {
             if(baseMutableData!=null && baseMutableData.matchChangeFeatures().contains(matchChangeFeature) && cls.isInstance(baseMutableData)) {
