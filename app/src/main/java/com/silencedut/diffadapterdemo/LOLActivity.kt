@@ -49,7 +49,7 @@ class LOLActivity : AppCompatActivity(){
         diffAdapter.registerHolder(LegendHolder::class.java, LegendViewData.VIEW_ID)
 
 
-        val linearLayoutManager = LinearLayoutManager(this)
+        val linearLayoutManager = LinearLayoutManagerWrapper(this)
         mRVTest!!.layoutManager = linearLayoutManager
         mRVTest!!.adapter = diffAdapter
 
@@ -173,7 +173,7 @@ class LOLActivity : AppCompatActivity(){
 
                         it.post(object :Runnable{
                             override fun run() {
-                                diffAdapter.clear()
+                               // diffAdapter.clear()
                                 val time = (30 until 450L).random()
                                 it.postDelayed(this, time)
                             }

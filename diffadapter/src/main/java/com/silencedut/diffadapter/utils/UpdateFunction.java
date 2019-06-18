@@ -6,7 +6,9 @@ import com.silencedut.diffadapter.data.BaseMutableData;
 
 /**
  * @author SilenceDut
+ * use {@link UpdatePayloadFunction}
  */
+@Deprecated
 public interface UpdateFunction<I,R extends BaseMutableData> {
 
     /**

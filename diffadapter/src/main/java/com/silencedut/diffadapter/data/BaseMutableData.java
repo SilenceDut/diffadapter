@@ -5,8 +5,10 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 
 import com.silencedut.diffadapter.IProvideItemId;
+import com.silencedut.diffadapter.utils.UpdatePayloadFunction;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -40,7 +42,7 @@ public abstract class BaseMutableData<T extends BaseMutableData> implements IPro
     public abstract boolean areUISame(@NonNull T data);
 
     /**
-     * payload 方式 更新item，可实现对单个Item的局部刷新
+     * payload 方式 更新item，可实现对Item的局部刷新
      * @param newData 新数据
      * @return 旧数据和新数据需要改变的部分，
      */
@@ -50,6 +52,11 @@ public abstract class BaseMutableData<T extends BaseMutableData> implements IPro
         return mPayloadBundle;
     }
 
+    /**
+     * 用于全量数据对比时对Item进行局部更新
+     * 如果在一个页面不会多次调用{@link com.silencedut.diffadapter.DiffAdapter#setDatas(List)}或者不使用payload更新方式，可不实现此方法
+     * 单个数据局部更新的方式用use {@link UpdatePayloadFunction},
+     */
     public void appendDiffPayload(@NonNull T newData,@NonNull Bundle diffPayloadBundle){
 
     }

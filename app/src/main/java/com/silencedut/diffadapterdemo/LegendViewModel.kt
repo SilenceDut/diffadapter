@@ -9,6 +9,7 @@ import com.silencedut.core.provider.legend.LegendNotification
 import com.silencedut.core.provider.legend.pojo.*
 import com.silencedut.diffadapter.DiffAdapter
 import com.silencedut.diffadapter.data.BaseMutableData
+import com.silencedut.diffadapter.utils.UpdatePayloadFunction
 import com.silencedut.diffadapter.utils.UpdateFunction
 import com.silencedut.diffadapterdemo.adapter.LegendViewData
 import com.silencedut.diffadapterdemo.adapter.SkinViewData
@@ -90,15 +91,17 @@ class LegendViewModel: ViewModel(), LegendNotification.LegendInfo, LegendNotific
         })
 
         //如果变化的数据只需要特定类型的Holder刷新，类型即可指定
-        diffAdapter.addUpdateMediator(legendPriceData,  object : UpdateFunction<LegendPrice, LegendViewData> {
-            override fun providerMatchFeature(input: LegendPrice): Any {
-                return input.id
+        diffAdapter.addUpdateMediator(legendPriceData,  object : UpdatePayloadFunction<LegendPrice, LegendViewData>() {
+            override fun applyChange(
+                input: LegendPrice, originalData: LegendViewData, payloadKeys: MutableSet<String>
+            ): LegendViewData {
+                originalData.price = input.price
+                payloadKeys.add(LegendViewData.KEY_PRICE)
+                return originalData
             }
 
-            override fun applyChange(input: LegendPrice, originalData: LegendViewData): LegendViewData {
-                Log.d(TAG,"applyChange legendPriceData $input")
-                //可以new对象
-                return LegendViewData(originalData.id, originalData.legendBaseInfo, input.price)
+            override fun providerMatchFeature(input: LegendPrice): Any {
+                return input.id
             }
         })
 
@@ -124,7 +127,7 @@ class LegendViewModel: ViewModel(), LegendNotification.LegendInfo, LegendNotific
 
     override fun onLegendPriceFetched(legendPrice: LegendPrice) {
         Log.d(TAG,"onLegendPriceFetched $legendPrice")
-        legendPriceData.value = legendPrice
+        legendPriceData.postValue(legendPrice)
 
     }
 
