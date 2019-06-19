@@ -176,12 +176,12 @@ public void appendMatchFeature(@NonNull Set<Object> allMatchFeatures) {
 private val userInfoData = MutableLiveData<UserInfo>()
 
 //在adapter里监听数据变化
-diffAdapter.addUpdateMediator(userInfoData, object : UpdateFunction<UserInfo, ItemViewData> {
+diffAdapter.addUpdateMediator(userInfoData, object : UpdatePayloadFunction<UserInfo, ItemViewData> {
     override fun providerMatchFeature(input: UserInfo): Any {
         return input.uid
     }
 
-    override fun applyChange(input: UserInfo, originalData: ItemViewData): ItemViewData {
+    override fun applyChange(input: UserInfo, originalData: ItemViewData,, payloadKeys: MutableSet<String>): ItemViewData {
         
        return originalData.userInfo = input
         
@@ -194,17 +194,16 @@ fun asyncDataFetch(userInfo : UserInfo) {
 }
 
 ```
-这样当asyncDataFetch接收到数据变化的通知的时候，改变userInfoData的值，adapter里对应的Item就会更新。其中找到adapter中需要更新的Item是关键部分，主要由实现`UpdateFunction`来完成，实现`UpdateFunction`也很简单。
+这样当asyncDataFetch接收到数据变化的通知的时候，改变userInfoData的值，adapter里对应的Item就会更新。其中找到adapter中需要更新的Item是关键部分，主要由实现`UpdatePayloadFunction `来完成，实现`UpdatePayloadFunction `也很简单。
 
 ```java
-interface UpdateFunction<I,R extends BaseMutableData> {
+public abstract class UpdatePayloadFunction<I, R extends BaseMutableData> implements UpdateFunction<I,R > {
 
     /**
      * 匹配所有数据，及返回类型为R的所有数据
      */
     Object MATCH_ALL = new Object();
 
-   
     /**
      * 提供一个特征，用来查找列表数据中和此特征相同的数据
      * @param input 用来提供查找数据和最终改变列表的数据 ,最终匹配的是allMatchFeatures里的数据，默认情况下就是uniqueItemFeature()
@@ -213,16 +212,23 @@ interface UpdateFunction<I,R extends BaseMutableData> {
     Object providerMatchFeature(@NonNull I input);
 
     /**
-     * 匹配到对应的数据，如果符合条件的数据有很多个，可能会被回调多次
+     * 匹配到对应的数据，如果符合条件的数据有很多个，可能会被回调多次，不需要新建对象，主需要根据Input把originalData改变相应的值就行了
      * @param input 是数据改变的部分数据源
      * @param originalData 需要改变的数据项
-     * @return 改变后的数据项
+     * @param payloadKeys 用来标识改变后的数据哪些部分发生了改变，if payloadKeys is not empty  ,
+     * {@link com.silencedut.diffadapter.holder.BaseDiffViewHolder#updatePartWithPayload(BaseMutableData, Bundle, int)}
+     *                    will be call rather than
+     * {@link com.silencedut.diffadapter.holder.BaseDiffViewHolder#updateItem(BaseMutableData, int)}
+     * @return 改变后的数据项,
+     *
      */
-    R applyChange(@NonNull I input,@NonNull R originalData);
+
+     public abstract R applyChange(@NonNull I input, @NonNull R originalData, @NonNull Set<String> payloadKeys);
 
 }
 ```
-`UpdateFunction`用来提供异步数据获取到后数据用来和列表中的数据匹配的规则和根据规则找到需要更改的对象后如果改变原对象，剩下的更新都由`diffadapter`来处理。如果符合条件的数据有很多个，`applyChange(@NonNull I input,@NonNull R originalData)`会被回调多次。如下时：
+`UpdatePayloadFunction`用来提供异步数据获取到后数据用来和列表中的数据匹配的规则和根据规则找到需要更改的对象后如果改变原对象，剩下的更新都由`diffadapter`来处理。如果符合条件的数据有很多个，`applyChange(@NonNull I input, @NonNull R originalData, @NonNull Set<String> payloadKeys)`会被回调多次。
+如下时：
 
 ```java
 Object providerMatchFeature(@NonNull I input) {
@@ -233,9 +239,15 @@ Object providerMatchFeature(@NonNull I input) {
 
 如果同一种匹配规则`providerMatchFeature`对应多种Holder类型，`UpdateFunction<I,R>`的返回数据类型R就可以直接设为基类的`BaseMutableData`，然后再applyChange里在具体根据类型来处理不同的UI。
 
+`UpdateFunction`已废弃，`payloadKeys`可以用来解决payload方式更新item时每次需要new对象的问题。
+
 ### 最高效的Item局部更新方式 —— payload
 
-DiffUtil 能让一个列表中只更新部分变化的Item,payload能让同一个Item只更新需要变化的View,这种方式非常适合同一个Item有多个异步数据源的,同时又对性能有更高要求的列表。
+DiffUtil 能让一个列表中只更新部分数据变化的Item,payload能让同一个Item只更新需要变化的View,这种方式非常适合同一个Item有多个异步数据源的,同时又对性能有更高要求的列表。看具体更新需求来判断是否有必要。
+
+有两种情况的局部更新
+
+**第一种是全量数据对比的情况，也就是同一个业务可能会多次调用`diffadapter.setData(List)`,可使用如下的方式**
 
 **Step 1:重写BaseMutableData的appendDiffPayload**
 
@@ -250,40 +262,81 @@ data class ItemViewData(var uid:Long, var userInfo: UserInfo?, var anyOtherData:
     ...
     
     /**
-     * 最高效的更新方式，如果不是频繁更新的可以不实现这个方法
+     * 最高效的更新方式，如果不是全量频繁更新的可以不实现这个方法
      */
-    override fun appendDiffPayload(newData: ItemViewData, diffPayloadBundle: Bundle) {
-        super.appendDiffPayload(newData, diffPayloadBundle)
-        if(this.userInfo!= newData.userInfo) {
-            diffPayloadBundle.putString(KEY_BASE_INFO, KEY_BASE_INFO)
+     override fun appendPayloadKeys(newData: LegendViewData, payloadKeys: MutableSet<String>) {
+        super.appendPayloadKeys(newData, payloadKeys)
+         if(this.userInfo!= newData.userInfo) {
+            payloadKeys.add(KEY_BASE_INFO)
         }
         if(this.anyData != newData.anyData) {
-            diffPayloadBundle.putString(KEY_ANY, KEY_ANY)
+         		payloadKeys.add(KEY_ANY)
+
         }
-        ...
+		...
     }
+  
 }
 ```
 
 默认用Bundle存取变化，无需存具体的数据，只需类似设置标志位，表明Item的哪部分数据发生了变化。
+
+**第二种是异步动态更新一个Item的时候，比如个人资料获取，中途单个Item数据变化的情况,可使用如下的Step1**
+
+```java
+public R applyChange(@NonNull I input, @NonNull R originalData, @NonNull Set<String> payloadKeys){
+    ...
+    originalData.*** = input.***                     
+    payloadKeys.add("自定义String类型的Key值")
+    ...
+}
+```
+这两种方式不是互斥的,但也没什么关联，也可以根据自己的业务场景自行选择，如果不需要payload更新，两种方式都不需要。后续的步骤两种方式相同。
 
 **Step 2 :需要重写BaseDiffViewHolder里的`updatePartWithPayload`**
 
 ```kotlin
 class ItemViewHolder(itemViewRoot: View, recyclerAdapter: DiffAdapter): BaseDiffViewHolder<ItemViewData>( itemViewRoot,  recyclerAdapter){
      
-    override fun updatePartWithPayload(data: ItemViewData, payload: Bundle, position: Int) {
+    override fun updatePartWithPayload(data: ItemViewData, payloadKeys: MutableSet<String>, position: Int) {
 
-    if(payload.getString(ItemViewData.KEY_BASE_INFO)!=null) {
+    if(payloadKeys.contains(ItemViewData.KEY_BASE_INFO)) {
         updateBaseInfo(data)
     }
 
-    if(payload.getString(ItemViewData.KEY_ANY)!=null) {
+    if(payloadKeys.contains(ItemViewData.KEY_ANY)) {
         updateAnyView(data)
     }
 }
 ```
-根据变化的标志位，更新Item中需要变化部分的View
+
+**Step 3:监听数据变化，更新列表，这个只是异步数据更新Item需要也就是第二种场景，如果每次`diffadapter.setData(List)`的数据已经是是有所有的数据信息，不需要以下的动态更新方案**
+
+```kotlin
+//用于监听请求的异步数据，userInfoData变化时与此相关的数据
+private val userInfoData = MutableLiveData<UserInfo>()
+
+//在adapter里监听数据变化
+diffAdapter.addUpdateMediator(userInfoData, object : UpdateFunction<UserInfo, ItemViewData> {
+    override fun providerMatchFeature(input: UserInfo): Any {
+        return input.uid
+    }
+
+    override fun applyChange(@NonNull I input, @NonNull R originalData, @NonNull Set<String> payloadKeys): ItemViewData {
+       //不再需要新建对象
+       originalData.*** = input.***                     
+       payloadKeys.add("自定义String类型的Key值")
+       return originalData
+        
+    }
+})
+
+// 任何通知数据获取到的通知
+fun asyncDataFetch(userInfo : UserInfo) {
+    userInfoData.value = userInfo
+}
+```
+
 
 ## More
 
