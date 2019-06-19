@@ -20,7 +20,8 @@ import java.util.Set;
 
 public abstract class BaseMutableData<T extends BaseMutableData> implements IProvideItemId {
     private Set<Object> mMathFeature = new HashSet<>();
-    private Bundle mPayloadBundle = new Bundle();
+
+    private Set<String> payloadKeys = new HashSet<>();
 
     /**
      * 通过一个列表里的数据独一无二的特征来判断是不是同一个Item，如uid，消息id等
@@ -46,21 +47,45 @@ public abstract class BaseMutableData<T extends BaseMutableData> implements IPro
      * @param newData 新数据
      * @return 旧数据和新数据需要改变的部分，
      */
-    public final @NonNull Bundle getDiffPayload(@NonNull T newData){
-        mPayloadBundle.clear();
-        appendDiffPayload(newData,mPayloadBundle);
-        return mPayloadBundle;
+    public final @NonNull Set<String> getPayloadKeys(@NonNull T newData) {
+        appendPayloadKeys(newData,payloadKeys);
+        return payloadKeys;
     }
 
     /**
-     * 用于全量数据对比时对Item进行局部更新
-     * 如果在一个页面不会多次调用{@link com.silencedut.diffadapter.DiffAdapter#setDatas(List)}或者不使用payload更新方式，可不实现此方法
-     * 单个数据局部更新的方式用use {@link UpdatePayloadFunction},
+     * payload 方式 更新item，可实现对Item的局部刷新
+     * @param newData 新数据
+     * @return 旧数据和新数据需要改变的部分，
      */
-    public void appendDiffPayload(@NonNull T newData,@NonNull Bundle diffPayloadBundle){
+    public final @NonNull Bundle getDiffPayload(@NonNull T newData){
+        Bundle payload = new Bundle();
+        appendDiffPayload(newData,payload);
+        return payload;
+    }
+
+
+    /**
+     * no use anymore ,interface just Compatible with older versions
+     * @deprecated use {@link #appendPayloadKeys(BaseMutableData, Set)}
+     */
+    public void appendDiffPayload(@NonNull T newData,@NonNull Bundle diffPayloadBundle) {
 
     }
 
+    public Set<String> getPayloadKeys() {
+        return payloadKeys;
+    }
+
+    /**
+     * @param newData 新的数据，注意和原数据不是同一个对象
+     * @param payloadKeys 用来标志那些数据项发生了变化
+     * 用于全量数据对比时对Item进行局部更新，除非对性能有极高要求，此接口可不实现
+     * 如果在一个页面不会多次调用{@link com.silencedut.diffadapter.DiffAdapter#setDatas(List)}或者不使用payload更新方式，可不实现此方法
+     * 单个数据局部更新的方式用use {@link UpdatePayloadFunction},
+     */
+    public void appendPayloadKeys(@NonNull T newData,@NonNull Set<String> payloadKeys) {
+
+    }
 
     /**
      * 提供一个或多个用来匹配列表中所有的需要变化的数据的特征，也就是找出数据中包含该mMathFeature里的特征的数据，

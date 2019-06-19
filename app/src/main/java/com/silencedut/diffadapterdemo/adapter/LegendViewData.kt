@@ -1,6 +1,7 @@
 package com.silencedut.diffadapterdemo.adapter
 
 import android.os.Bundle
+import android.util.Log
 import com.silencedut.core.provider.legend.pojo.LegendBaseInfo
 import com.silencedut.diffadapter.data.BaseMutableData
 import com.silencedut.diffadapterdemo.R
@@ -33,11 +34,15 @@ data class LegendViewData(var id:Long, var legendBaseInfo: LegendBaseInfo?, var 
      */
     override fun appendDiffPayload(newData: LegendViewData, diffPayloadBundle: Bundle) {
         super.appendDiffPayload(newData, diffPayloadBundle)
+
+        Log.d("LegendViewData","appendDiffPayload:"+newData)
         if(this.legendBaseInfo != newData.legendBaseInfo) {
             diffPayloadBundle.putString(KEY_BASE_INFO, KEY_BASE_INFO)
+            Log.d("LegendViewData","appendDiffPayload"+KEY_BASE_INFO)
         }
         if(this.price != newData.price) {
             diffPayloadBundle.putString(KEY_PRICE, KEY_PRICE)
+            Log.d("LegendViewData","appendDiffPayload"+KEY_PRICE)
         }
 
     }

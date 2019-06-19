@@ -2,6 +2,7 @@ package com.silencedut.diffadapterdemo
 
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
+import android.os.Bundle
 import android.util.Log
 import com.silencedut.core.Transfer
 import com.silencedut.core.provider.legend.ILegendDateProvider
@@ -18,7 +19,7 @@ import com.silencedut.diffadapterdemo.adapter.SkinViewData
  * @author SilenceDut
  * @date 2019/1/17
  */
-class LegendViewModel: ViewModel(), LegendNotification.LegendInfo, LegendNotification.LegendsList{
+class LegendViewModel : ViewModel(), LegendNotification.LegendInfo, LegendNotification.LegendsList {
 
     val legendsData = MutableLiveData<List<BaseMutableData<*>>>()
     private val legendBaseInfoData = MutableLiveData<LegendBaseInfo>()
@@ -47,11 +48,11 @@ class LegendViewModel: ViewModel(), LegendNotification.LegendInfo, LegendNotific
         Transfer.getImpl(ILegendDateProvider::class.java).legendsDataChanged()
     }
 
-    fun updateSkinHolder(legendId : Long) {
+    fun updateSkinHolder(legendId: Long) {
         Transfer.getImpl(ILegendDateProvider::class.java).updateLegendSkin(legendId)
     }
 
-    fun updateLegendHolder(legendId : Long) {
+    fun updateLegendHolder(legendId: Long) {
         Transfer.getImpl(ILegendDateProvider::class.java).updateLegendNameAndPrice(legendId)
     }
 
@@ -61,28 +62,37 @@ class LegendViewModel: ViewModel(), LegendNotification.LegendInfo, LegendNotific
         }
     }
 
-    fun convertToAdapterData(legend: Legend) : BaseMutableData<*> {
-        return when(legend.type) {
-            Type.LEGEND -> LegendViewData(legend.id, Transfer.getImpl(ILegendDateProvider::class.java).baseLegendData(legend.id)
-                    , Transfer.getImpl(ILegendDateProvider::class.java).legendPrice(legend.id)?.price)
-            Type.SKIN -> SkinViewData(legend.id, Transfer.getImpl(ILegendDateProvider::class.java).baseLegendData(legend.id)?.iconUrl
-                    , Transfer.getImpl(ILegendDateProvider::class.java).legendSkin(legend.id))
+    fun convertToAdapterData(legend: Legend): BaseMutableData<*> {
+        return when (legend.type) {
+            Type.LEGEND -> LegendViewData(legend.id,
+                Transfer.getImpl(ILegendDateProvider::class.java).baseLegendData(legend.id)
+                , Transfer.getImpl(ILegendDateProvider::class.java).legendPrice(legend.id)?.price)
+            Type.SKIN -> SkinViewData(legend.id,
+                Transfer.getImpl(ILegendDateProvider::class.java).baseLegendData(legend.id)?.iconUrl
+                , Transfer.getImpl(ILegendDateProvider::class.java).legendSkin(legend.id))
         }
     }
 
-
     fun addUpdateMediator(diffAdapter: DiffAdapter) {
         //如果变化的数据可能引起多种类型的holder的刷新，UpdateFunction的类型传入基础BaseMutableData<*就行，在applyChange在根据类型进行改变
-        diffAdapter.addUpdateMediator(legendBaseInfoData,  object : UpdateFunction<LegendBaseInfo, BaseMutableData<*>> {
+        diffAdapter.addUpdateMediator(legendBaseInfoData, object : UpdatePayloadFunction<LegendBaseInfo, BaseMutableData<*>> {
             override fun providerMatchFeature(input: LegendBaseInfo): Any {
                 return input.id
             }
 
-            override fun applyChange(input: LegendBaseInfo, originalData: BaseMutableData<*>): BaseMutableData<*> {
-                Log.d(TAG,"applyChange $input")
-                return when(originalData) {
-                    is LegendViewData ->   LegendViewData(originalData.id, input, originalData.price)
-                    is SkinViewData ->  SkinViewData(originalData.id, input.iconUrl, originalData.legendSkin)
+            override fun applyChange(input: LegendBaseInfo, originalData: BaseMutableData<*>, payloadKeys: MutableSet<String>): BaseMutableData<*> {
+                Log.d(TAG, "applyChange $input")
+                return when (originalData) {
+                    is LegendViewData -> {
+                        originalData.legendBaseInfo = input
+                        payloadKeys.add(LegendViewData.KEY_BASE_INFO)
+                        originalData
+                    }
+                    is SkinViewData -> { //不使用payload方式更新
+
+                        originalData.legendIcon = input.iconUrl
+                        originalData
+                    }
                     else -> {
                         originalData
                     }
@@ -91,7 +101,7 @@ class LegendViewModel: ViewModel(), LegendNotification.LegendInfo, LegendNotific
         })
 
         //如果变化的数据只需要特定类型的Holder刷新，类型即可指定
-        diffAdapter.addUpdateMediator(legendPriceData,  object : UpdatePayloadFunction<LegendPrice, LegendViewData>() {
+        diffAdapter.addUpdateMediator(legendPriceData, object : UpdatePayloadFunction<LegendPrice, LegendViewData> {
             override fun applyChange(
                 input: LegendPrice, originalData: LegendViewData, payloadKeys: MutableSet<String>
             ): LegendViewData {
@@ -101,38 +111,38 @@ class LegendViewModel: ViewModel(), LegendNotification.LegendInfo, LegendNotific
             }
 
             override fun providerMatchFeature(input: LegendPrice): Any {
+                Log.d(TAG, "providerMatchFeature ${input.id}")
                 return input.id
             }
         })
 
         //如果变化的数据只需要特定类型的Holder刷新，类型即可指定
-        diffAdapter.addUpdateMediator(legendSkinData,  object : UpdateFunction<LegendSkin, SkinViewData> {
+        diffAdapter.addUpdateMediator(legendSkinData, object : UpdateFunction<LegendSkin, SkinViewData> {
             override fun providerMatchFeature(input: LegendSkin): Any {
                 return input.id
             }
 
             override fun applyChange(input: LegendSkin, originalData: SkinViewData): SkinViewData {
-                 Log.d(TAG,"applyChange legendSkinData $input")
-                 //可以在原对象上修改
-                 originalData.legendSkin = input
-                 return originalData
+                Log.d(TAG, "applyChange legendSkinData $input")
+                //可以在原对象上修改
+                originalData.legendSkin = input
+                return originalData
             }
         })
     }
 
     override fun onLegendBaseInfoFetched(legendBaseInfo: LegendBaseInfo) {
-        Log.d(TAG,"onLegendBaseInfoFetched $legendBaseInfo")
+        Log.d(TAG, "onLegendBaseInfoFetched $legendBaseInfo")
         legendBaseInfoData.value = legendBaseInfo
     }
 
     override fun onLegendPriceFetched(legendPrice: LegendPrice) {
-        Log.d(TAG,"onLegendPriceFetched $legendPrice")
-        legendPriceData.postValue(legendPrice)
-
+        Log.d(TAG, "onLegendPriceFetched $legendPrice")
+        legendPriceData.value = legendPrice
     }
 
     override fun onLegendSkinsFetched(legendSkin: LegendSkin) {
-        Log.d(TAG,"onLegendSkinsFetched $legendSkin")
+        Log.d(TAG, "onLegendSkinsFetched $legendSkin")
         legendSkinData.value = legendSkin
     }
 }

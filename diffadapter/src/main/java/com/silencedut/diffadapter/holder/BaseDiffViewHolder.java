@@ -7,6 +7,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 
@@ -14,6 +15,8 @@ import com.silencedut.diffadapter.DiffAdapter;
 import com.silencedut.diffadapter.IProvideItemId;
 import com.silencedut.diffadapter.data.BaseMutableData;
 import com.silencedut.diffadapter.utils.DiffModelProvider;
+
+import java.util.Set;
 
 /**
  *
@@ -65,11 +68,21 @@ public abstract class BaseDiffViewHolder<T extends BaseMutableData> extends Recy
     public abstract void updateItem(@NonNull T data, int position);
 
     /**
+     * no use anymore ,interface just Compatible with older versions
+     *  use  {@link #updatePartWithPayload(BaseMutableData, Set, int)}
+     */
+    @Deprecated
+    public void updatePartWithPayload(T data, @NonNull Bundle payload, int position) {
+
+    }
+
+
+    /**
      * if payload is not empty  , this method will be call rather than {@link #updateItem(T, int)}
-     * @param data
+     * @param newData
      * @param position
      */
-    public void updatePartWithPayload(T data, @NonNull Bundle payload, int position){
+    public void updatePartWithPayload(T newData, @NonNull Set<String> payloadKeys, int position){
 
     }
 

@@ -61,13 +61,7 @@ class LOLActivity : AppCompatActivity(){
             if (it != null) {
                 val list = mutableListOf<BaseMutableData<*>>()
                 list.addAll(it)
-                list.addAll(it)
-                list.addAll(it)
-                list.addAll(it)
-                list.addAll(it)
-                list.addAll(it)
-                list.addAll(it)
-                list.addAll(it)
+
                 diffAdapter.datas = list
             }
 

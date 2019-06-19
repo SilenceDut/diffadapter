@@ -61,13 +61,15 @@ class LegendHolder(itemViewRoot: View, recyclerAdapter: DiffAdapter): BaseDiffVi
     /**
      * 最高效的更新方式，如果不是频繁更新的可以不实现这个方法
      */
-    override fun updatePartWithPayload(data: LegendViewData, payload: Bundle, position: Int) {
 
-        Log.d(TAG,"position :"+position+"updatePartWithPayload payload  :"+payload.getString(LegendViewData.KEY_BASE_INFO)+",price : "+payload.getString(LegendViewData.KEY_PRICE)+",data:"+data)
-        if(payload.getString(LegendViewData.KEY_BASE_INFO)!=null) {
+
+    override fun updatePartWithPayload(newData: LegendViewData?, payloadKeys: MutableSet<String>, position: Int) {
+        super.updatePartWithPayload(newData, payloadKeys, position)
+        Log.d(TAG,"position :"+position+"updatePartWithPayloadKey payload  :,data:"+payloadKeys)
+        if(payloadKeys.contains(LegendViewData.KEY_BASE_INFO)) {
             updateBaseInfo(data)
         }
-        if(payload.getString(LegendViewData.KEY_PRICE)!=null) {
+        if(payloadKeys.contains(LegendViewData.KEY_PRICE)) {
             updatePrice(data)
         }
     }

@@ -124,7 +124,7 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
             @Override
             public Object getChangePayload(@NonNull BaseMutableData oldItem, @NonNull BaseMutableData newItem) {
 
-                return oldItem.getDiffPayload(newItem);
+                return oldItem.getPayloadKeys(newItem);
             }
         });
     }
@@ -150,49 +150,45 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
         setDatas(data);
     }
 
+    private @Nullable
+    Class findNeedUpdateDataType(Object updateFunction) {
+        ParameterizedType parameterizedType = (ParameterizedType) updateFunction.getClass().getGenericInterfaces()[0];
+
+        Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+        Type neededDataType;
+        if (actualTypeArguments.length > 1) {
+            neededDataType = actualTypeArguments[1];
+        } else {
+            return null;
+        }
+        Class clsType = null;
+        if (neededDataType != null) {
+            if (neededDataType instanceof Class) {
+                clsType = (Class) neededDataType;
+            } else if (neededDataType instanceof ParameterizedType) {
+                Type type = ((ParameterizedType) neededDataType).getRawType();
+                if (type instanceof Class) {
+                    clsType = (Class) type;
+                }
+            }
+        }
+        return clsType;
+    }
+
     public <I, R extends BaseMutableData> void addUpdateMediator(LiveData<I> elementData,
-                                                                 final UpdateFunction<I, R> updateFunction) {
+                                                                 final UpdatePayloadFunction<I, R> updatePayloadFunction) {
         mUpdateMediatorLiveData.addSource(elementData, new Observer<I>() {
             @Override
             public void onChanged(@Nullable final I dataSource) {
 
                 if (dataSource != null) {
 
-                    Object matchFeature = updateFunction.providerMatchFeature(dataSource);
-                    Log.d("addUpdateMediator",
-                            "before"+dataSource.toString()+",,"+ updateFunction.getClass().getGenericSuperclass()+
-                                    ";;;;"+updateFunction.getClass().getGenericSuperclass());
-                    ParameterizedType parameterizedType ;
+                    Class clsType = findNeedUpdateDataType(updatePayloadFunction);
 
-
-                    if(updateFunction instanceof UpdatePayloadFunction) {
-                        parameterizedType =
-                                (ParameterizedType)((UpdatePayloadFunction)updateFunction).getClass().getGenericSuperclass();
-                    }else {
-                        parameterizedType =  (ParameterizedType) updateFunction.getClass().getGenericInterfaces()[0];
-                    }
-
-                    Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
-                    Log.d("addUpdateMediator","after type 1"+actualTypeArguments.toString());
-                    Type neededDataType;
-                    if (actualTypeArguments.length > 1) {
-                        neededDataType = actualTypeArguments[1];
-                    } else {
+                    if (clsType == null) {
                         return;
                     }
-                    Log.d("addUpdateMediator","after type"+neededDataType);
-                    Class clsType = null;
-                    if (neededDataType != null) {
-                        if (neededDataType instanceof Class) {
-                            clsType = (Class) neededDataType;
-                        } else if (neededDataType instanceof ParameterizedType) {
-                            Type type = ((ParameterizedType) neededDataType).getRawType();
-                            if (type instanceof Class) {
-                                clsType = (Class) type;
-                            }
-                        }
-                    }
-
+                    Object matchFeature = updatePayloadFunction.providerMatchFeature(dataSource);
                     List<R> oldMatchedDatas;
                     if (UpdateFunction.MATCH_ALL.equals(matchFeature)) {
                         oldMatchedDatas = getData(clsType);
@@ -202,17 +198,13 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
 
                     for (final R oldData : oldMatchedDatas) {
                         if (oldData != null) {
-                            final R newData ;
-                            final Set<String> keys = new HashSet<>();
-                            if(updateFunction instanceof UpdatePayloadFunction) {
-                                newData = (R) ((UpdatePayloadFunction)updateFunction).applyChange(dataSource,oldData,keys);
-                            }else  {
-                                newData = updateFunction.applyChange(dataSource, oldData);
-                            }
+                            final R newData;
+                            final Set<String> keys = oldData.getPayloadKeys();
+                            newData = updatePayloadFunction.applyChange(dataSource, oldData, keys);
                             long current = SystemClock.elapsedRealtime();
                             if (current > mCanUpdateTimeMill || getItemCount() < UPDATE_DELAY_THRESHOLD) {
 
-                                updateData(newData,keys);
+                                updateData(newData, keys);
                                 mCanUpdateTimeMill = current + AsyncListUpdateDiffer.DELAY_STEP;
                             } else {
                                 long delay = mCanUpdateTimeMill - current;
@@ -220,7 +212,56 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
                                 mDiffHandler.postDelayed(new Runnable() {
                                     @Override
                                     public void run() {
-                                        updateData(newData,keys);
+                                        updateData(newData, keys);
+                                    }
+                                }, delay);
+                                mCanUpdateTimeMill += AsyncListUpdateDiffer.DELAY_STEP;
+                            }
+
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    public <I, R extends BaseMutableData> void addUpdateMediator(LiveData<I> elementData,
+                                                                 final UpdateFunction<I, R> updateFunction) {
+        mUpdateMediatorLiveData.addSource(elementData, new Observer<I>() {
+            @Override
+            public void onChanged(@Nullable final I dataSource) {
+
+                if (dataSource != null) {
+
+                    Class clsType = findNeedUpdateDataType(updateFunction);
+
+                    if (clsType == null) {
+                        return;
+                    }
+                    Object matchFeature = updateFunction.providerMatchFeature(dataSource);
+                    List<R> oldMatchedDatas;
+                    if (UpdateFunction.MATCH_ALL.equals(matchFeature)) {
+                        oldMatchedDatas = getData(clsType);
+                    } else {
+                        oldMatchedDatas = getMatchedData(matchFeature, clsType);
+                    }
+
+                    for (final R oldData : oldMatchedDatas) {
+                        if (oldData != null) {
+                            final R newData;
+                            newData = updateFunction.applyChange(dataSource, oldData);
+                            long current = SystemClock.elapsedRealtime();
+                            if (current > mCanUpdateTimeMill || getItemCount() < UPDATE_DELAY_THRESHOLD) {
+
+                                updateData(newData);
+                                mCanUpdateTimeMill = current + AsyncListUpdateDiffer.DELAY_STEP;
+                            } else {
+                                long delay = mCanUpdateTimeMill - current;
+
+                                mDiffHandler.postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        updateData(newData);
                                     }
                                 }, delay);
                                 mCanUpdateTimeMill += AsyncListUpdateDiffer.DELAY_STEP;
@@ -351,11 +392,10 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
 
     }
 
-    private void updateData(BaseMutableData newData,@NonNull Set<String> payloadKeys) {
+    private void updateData(BaseMutableData newData, @NonNull Set<String> payloadKeys) {
         if (newData == null) {
             return;
         }
-
         Iterator<BaseMutableData> iterator = mDatas.iterator();
         int foundIndex = -1;
 
@@ -369,17 +409,21 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
                 mDatas.set(foundIndex, newData);
 
                 if (mDatas.size() > foundIndex) {
+                    Set<String> dataPayloadKeys = data.getPayloadKeys(newData);
 
-                    Bundle payload = data.getDiffPayload(newData);
-
-                    if (payloadKeys.isEmpty() && payload.isEmpty()) {
-                        Log.d(TAG, "notifyItemChanged :" + foundIndex + "isEmpty");
-                        notifyItemChanged(foundIndex);
-                    } else if(payload.isEmpty()){
-                        Log.d(TAG, "notifyItemChanged :" + foundIndex + ",size:" + payload);
+                    payloadKeys.addAll(dataPayloadKeys);
+                    if (payloadKeys.isEmpty()) {
+                        Bundle payload = data.getDiffPayload(newData);
+                        Log.d(TAG, "notifyItemChanged :" + foundIndex + ",getDiffPayload:" + payload);
+                        if (payload.isEmpty()) {
+                            notifyItemChanged(foundIndex);
+                        } else {
+                            Log.d(TAG, "notifyItemChanged :" + foundIndex + ",payload:" + payload);
+                            notifyItemChanged(foundIndex, payload);
+                        }
+                    } else {
+                        Log.d(TAG, "notifyItemChanged :" + foundIndex + ",payloadKeys:" + payloadKeys);
                         notifyItemChanged(foundIndex, payloadKeys);
-                    }else {
-                        notifyItemChanged(foundIndex, payload);
                     }
                 }
             }
@@ -387,7 +431,7 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
     }
 
     public void updateData(BaseMutableData newData) {
-        updateData(newData,new HashSet<String>());
+        updateData(newData, newData.getPayloadKeys());
     }
 
     @NonNull
@@ -420,7 +464,7 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull BaseDiffViewHolder holder, int position, @NonNull List<Object> payloads) {
-
+        Log.e(TAG, "onBindViewHolder updatePartWithPayload position" + position + ",,payloads" + payloads);
         if (mDatas.size() == 0 || mDatas.get(position) == null) {
             return;
         }
@@ -428,32 +472,40 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
         if (getItemViewType(position) != holder.getItemViewId()) {
             return;
         }
-
+        Set<String> payloadKeys = null;
         if (payloads.isEmpty()) {
             this.onBindViewHolder(holder, position);
         } else {
             try {
                 Bundle diffPayloads = new Bundle();
+
                 for (Object payload : payloads) {
                     if (payload instanceof Bundle) {
                         diffPayloads.putAll((Bundle) payload);
                     } else if (payload instanceof HashSet) {
-                        for (Object key : (HashSet) payload) {
-                            if (key instanceof String) {
-                                diffPayloads.putString((String)key, (String)key);
-                            }
+                        if (payloadKeys == null) {
+                            payloadKeys = (HashSet) payload;
+                        } else {
+                            payloadKeys.addAll((HashSet) payload);
                         }
                     }
                 }
-                if (diffPayloads.isEmpty()) {
+                if (diffPayloads.isEmpty() && payloadKeys.isEmpty()) {
                     this.onBindViewHolder(holder, position);
                 } else {
-                    holder.updatePartWithPayload(mDatas.get(position), diffPayloads, position);
+                    if (payloadKeys.isEmpty()) {
+                        holder.updatePartWithPayload(mDatas.get(position), diffPayloads, position);
+                    } else {
+                        holder.updatePartWithPayload(mDatas.get(position), payloadKeys, position);
+                    }
                 }
 
             } catch (Exception e) {
                 Log.e(TAG, "onBindViewHolder updatePartWithPayload payload error", e);
             }
+        }
+        if (payloadKeys != null) {
+            payloadKeys.clear();
         }
 
     }

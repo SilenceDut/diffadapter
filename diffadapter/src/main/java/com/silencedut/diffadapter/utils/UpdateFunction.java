@@ -29,6 +29,7 @@ public interface UpdateFunction<I,R extends BaseMutableData> {
      * @param originalData 需要改变的数据项
      * @return 改变后的数据项
      */
+    @Deprecated
     R applyChange(@NonNull I input,@NonNull R originalData);
 
 }
