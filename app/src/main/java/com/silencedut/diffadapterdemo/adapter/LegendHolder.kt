@@ -56,6 +56,7 @@ class LegendHolder(itemViewRoot: View, recyclerAdapter: DiffAdapter): BaseDiffVi
         data.price?.let {
             legendPriceTv?.text = "￥$it"
         }
+
     }
 
     /**
