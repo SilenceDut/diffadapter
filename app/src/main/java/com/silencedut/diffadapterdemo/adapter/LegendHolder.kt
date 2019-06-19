@@ -41,7 +41,6 @@ class LegendHolder(itemViewRoot: View, recyclerAdapter: DiffAdapter): BaseDiffVi
         Log.d(TAG,"updateItem $data")
         updateBaseInfo(data)
         updatePrice(data)
-
     }
 
     private fun updateBaseInfo(data: LegendViewData) {
