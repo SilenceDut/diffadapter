@@ -302,6 +302,22 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
 
     }
 
+    public <T extends BaseMutableData> void addDatas(final List<T> datas) {
+        if (datas == null) {
+            return;
+        }
+
+        mDifferHelper.updateOldListSize(new Runnable() {
+            @Override
+            public void run() {
+                mDatas.addAll(datas);
+                notifyItemChanged(mDatas.size() - datas.size());
+
+            }
+        }, mDatas);
+
+    }
+
     public void deleteData(final Object uniqueItemFeature) {
         if (uniqueItemFeature == null) {
             return;
