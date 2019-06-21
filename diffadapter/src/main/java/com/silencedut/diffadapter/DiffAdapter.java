@@ -290,7 +290,6 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
         if (data == null) {
             return;
         }
-
         mDifferHelper.updateOldListSize(new Runnable() {
             @Override
             public void run() {
@@ -299,20 +298,17 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
 
             }
         }, mDatas);
-
     }
 
     public <T extends BaseMutableData> void addDatas(final List<T> datas) {
         if (datas == null) {
             return;
         }
-
         mDifferHelper.updateOldListSize(new Runnable() {
             @Override
             public void run() {
                 mDatas.addAll(datas);
                 notifyItemChanged(mDatas.size() - datas.size());
-
             }
         }, mDatas);
 
