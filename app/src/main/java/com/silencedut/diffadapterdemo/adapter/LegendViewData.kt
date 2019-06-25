@@ -47,6 +47,10 @@ data class LegendViewData(var id:Long, var legendBaseInfo: LegendBaseInfo?, var 
 
     }
 
+    override fun appendPayloadKeys(newData: LegendViewData, payloadKeys: MutableSet<String>) {
+        super.appendPayloadKeys(newData, payloadKeys)
+    }
+
     override fun uniqueItemFeature(): Any {
        return this.id
     }

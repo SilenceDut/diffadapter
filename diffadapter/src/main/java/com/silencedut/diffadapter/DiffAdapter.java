@@ -225,6 +225,9 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
         });
     }
 
+    /**
+     * @deprecated use {{@link #addUpdateMediator(LiveData, UpdatePayloadFunction)} instead }
+     */
     public <I, R extends BaseMutableData> void addUpdateMediator(LiveData<I> elementData,
                                                                  final UpdateFunction<I, R> updateFunction) {
         mUpdateMediatorLiveData.addSource(elementData, new Observer<I>() {
