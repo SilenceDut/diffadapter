@@ -400,7 +400,12 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
         mDifferHelper.updateOldListSize(new Runnable() {
             @Override
             public void run() {
-                mDatas.addAll(startPosition, datas);
+                if (startPosition > datas.size()) {
+                    mDatas.addAll(datas);
+                } else {
+                    mDatas.addAll(startPosition, datas);
+                }
+
                 notifyItemRangeInserted(startPosition, datas.size());
             }
         }, mDatas);
