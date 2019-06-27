@@ -19,8 +19,8 @@ class RvHelper {
             return recyclerView.computeVerticalScrollExtent() + recyclerView.computeVerticalScrollOffset() >= recyclerView.computeVerticalScrollRange()
         }
 
-        fun scrollToBottom(recyclerView: RecyclerView,position:Int) {
-            recyclerView.layoutManager?.let {
+        fun scrollToBottom(recyclerView: RecyclerView?,position:Int) {
+            recyclerView?.layoutManager?.let {
                 if(it is LinearLayoutManager) {
                     it.scrollToPositionWithOffset(position, 0)
                 }

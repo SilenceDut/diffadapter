@@ -29,26 +29,16 @@ data class LegendViewData(var id:Long, var legendBaseInfo: LegendBaseInfo?, var 
     }
 
 
-    /**
-     * 最高效的更新方式，如果不是频繁更新的可以不实现这个方法
-     */
-    override fun appendDiffPayload(newData: LegendViewData, diffPayloadBundle: Bundle) {
-        super.appendDiffPayload(newData, diffPayloadBundle)
-
-        Log.d("LegendViewData","appendDiffPayload:"+newData)
+    override fun appendPayloadKeys(newData: LegendViewData, payloadKeys: MutableSet<String>) {
+        super.appendPayloadKeys(newData, payloadKeys)
         if(this.legendBaseInfo != newData.legendBaseInfo) {
-            diffPayloadBundle.putString(KEY_BASE_INFO, KEY_BASE_INFO)
+            payloadKeys.add(KEY_BASE_INFO)
             Log.d("LegendViewData","appendDiffPayload"+KEY_BASE_INFO)
         }
         if(this.price != newData.price) {
-            diffPayloadBundle.putString(KEY_PRICE, KEY_PRICE)
+            payloadKeys.add(KEY_PRICE)
             Log.d("LegendViewData","appendDiffPayload"+KEY_PRICE)
         }
-
-    }
-
-    override fun appendPayloadKeys(newData: LegendViewData, payloadKeys: MutableSet<String>) {
-        super.appendPayloadKeys(newData, payloadKeys)
     }
 
     override fun uniqueItemFeature(): Any {

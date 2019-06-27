@@ -81,7 +81,8 @@ class LOLActivity : AppCompatActivity(){
         findViewById<View>(R.id.random_add).setOnClickListener { _ ->
             val oneLegend = Transfer.getImpl(ILegendDateProvider::class.java).fetchOneLegends()
             diffAdapter.addData(legendViewModel.convertToAdapterData(oneLegend))
-
+            diffAdapter.datas.add(0,diffAdapter.datas[(0 until diffAdapter.itemCount-1).random()])
+            diffAdapter.datas = diffAdapter.datas
         }
 
         findViewById<View>(R.id.random_insert).setOnClickListener { _ ->
@@ -109,7 +110,7 @@ class LOLActivity : AppCompatActivity(){
             verify(diffAdapter)?.let {
                 diffAdapter.deleteData(diffAdapter.datas[(0 until diffAdapter.itemCount).random()])
             }
-           
+
         }
 
         findViewById<View>(R.id.forcible_crash_test).setOnClickListener { _ ->
@@ -238,7 +239,7 @@ class LOLActivity : AppCompatActivity(){
             Toast.makeText(this,"先获取数据",Toast.LENGTH_LONG).show()
             return null
         }
-        
+
         return Any()
     }
 

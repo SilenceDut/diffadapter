@@ -26,6 +26,7 @@ import android.view.ViewGroup;
 import com.silencedut.diffadapter.data.BaseMutableData;
 import com.silencedut.diffadapter.holder.BaseDiffViewHolder;
 import com.silencedut.diffadapter.holder.NoDataDifferHolder;
+import com.silencedut.diffadapter.rvhelper.RvHelper;
 import com.silencedut.diffadapter.utils.ListChangedCallback;
 import com.silencedut.diffadapter.utils.UpdatePayloadFunction;
 import com.silencedut.diffadapter.utils.UpdateFunction;
@@ -67,6 +68,7 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
     Handler mDiffHandler = new Handler(Looper.getMainLooper());
     public Fragment attachedFragment;
     public Context mContext;
+    private @Nullable RecyclerView mAttachedRecyclerView;
 
     @SuppressWarnings("unchecked")
     public DiffAdapter(FragmentActivity appCompatActivity) {
@@ -150,8 +152,7 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
         setDatas(data);
     }
 
-    private @Nullable
-    Class findNeedUpdateDataType(Object updateFunction) {
+    private @Nullable Class findNeedUpdateDataType(Object updateFunction) {
         ParameterizedType parameterizedType = (ParameterizedType) updateFunction.getClass().getGenericInterfaces()[0];
 
         Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
@@ -281,6 +282,9 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
 
         List<BaseMutableData> newList = new ArrayList<>(datas);
         mDifferHelper.submitList(newList);
+        if(mAttachedRecyclerView!=null) {
+            RvHelper.Companion.scrollToBottom(mAttachedRecyclerView,0);
+        }
     }
 
     public void clear() {
@@ -484,7 +488,7 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull BaseDiffViewHolder holder, int position, @NonNull List<Object> payloads) {
-        Log.e(TAG, "onBindViewHolder updatePartWithPayload position" + position + ",,payloads" + payloads);
+        Log.d(TAG, "onBindViewHolder updatePartWithPayload position" + position + ",,payloads" + payloads);
         if (mDatas.size() == 0 || mDatas.get(position) == null) {
             return;
         }
@@ -510,10 +514,10 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
                         }
                     }
                 }
-                if (diffPayloads.isEmpty() && payloadKeys.isEmpty()) {
+                if (diffPayloads.isEmpty() && payloadKeys!=null && payloadKeys.isEmpty()) {
                     this.onBindViewHolder(holder, position);
                 } else {
-                    if (payloadKeys.isEmpty()) {
+                    if (payloadKeys!=null && payloadKeys.isEmpty()) {
                         holder.updatePartWithPayload(mDatas.get(position), diffPayloads, position);
                     } else {
                         holder.updatePartWithPayload(mDatas.get(position), payloadKeys, position);
@@ -526,8 +530,8 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
         }
         if (payloadKeys != null) {
             payloadKeys.clear();
+            mDatas.get(position).getPayloadKeys().clear();
         }
-
     }
 
     public <T extends BaseMutableData> List<T> getMatchedData(Object matchChangeFeature, Class cls) {
@@ -552,12 +556,27 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
         return classLists;
     }
 
+    @Override
+    public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
+        super.onAttachedToRecyclerView(recyclerView);
+        Log.d(TAG, " onAttachedToRecyclerView ");
+        mAttachedRecyclerView = recyclerView;
+    }
+
+    @Override
+    public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView);
+        Log.d(TAG, " onDetachedFromRecyclerView ");
+        mAttachedRecyclerView = null;
+    }
+
+
     /**
      * 当前显示在列表中的数据，和{@link #setDatas(List)}里的数据大小可能不一样，由于DiffUtil可能还在计算的问题
      * 通过提供的接口来改变数据
      */
     public List<BaseMutableData> getDatas() {
-        return Collections.unmodifiableList(mDatas);
+        return mDatas;
     }
 
     @Override
