@@ -530,8 +530,8 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
         }
         if (payloadKeys != null) {
             payloadKeys.clear();
-            mDatas.get(position).getPayloadKeys().clear();
         }
+        mDatas.get(position).getPayloadKeys().clear();
     }
 
     public <T extends BaseMutableData> List<T> getMatchedData(Object matchChangeFeature, Class cls) {
