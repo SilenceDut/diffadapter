@@ -283,7 +283,12 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
         List<BaseMutableData> newList = new ArrayList<>(datas);
         mDifferHelper.submitList(newList);
         if(mAttachedRecyclerView!=null) {
-            RvHelper.Companion.scrollToBottom(mAttachedRecyclerView,0);
+            mDiffHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    RvHelper.Companion.scrollToBottom(mAttachedRecyclerView,0);
+                }
+            },1000);
         }
     }
 
