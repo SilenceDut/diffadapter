@@ -519,10 +519,10 @@ public class DiffAdapter extends RecyclerView.Adapter<BaseDiffViewHolder> {
                         }
                     }
                 }
-                if (diffPayloads.isEmpty() && payloadKeys!=null && payloadKeys.isEmpty()) {
+                if (payloadKeys ==null || (diffPayloads.isEmpty() &&  payloadKeys.isEmpty())) {
                     this.onBindViewHolder(holder, position);
                 } else {
-                    if (payloadKeys!=null && payloadKeys.isEmpty()) {
+                    if (payloadKeys.isEmpty()) {
                         holder.updatePartWithPayload(mDatas.get(position), diffPayloads, position);
                     } else {
                         holder.updatePartWithPayload(mDatas.get(position), payloadKeys, position);
