@@ -19,12 +19,25 @@ class RvHelper {
             return recyclerView.computeVerticalScrollExtent() + recyclerView.computeVerticalScrollOffset() >= recyclerView.computeVerticalScrollRange()
         }
 
-        fun scrollToBottom(recyclerView: RecyclerView?,position:Int) {
+        @Deprecated("no use anymore",ReplaceWith("RvHelper.scrollTo(recyclerView,position)" ))
+        fun scrollToBottom(recyclerView: RecyclerView?, position: Int) {
             recyclerView?.layoutManager?.let {
-                if(it is LinearLayoutManager) {
+                if (it is LinearLayoutManager) {
                     it.scrollToPositionWithOffset(position, 0)
                 }
             }
+        }
+
+        fun scrollTo(recyclerView: RecyclerView?, position: Int, delayed: Long = 0) {
+
+            recyclerView?.postDelayed({
+                recyclerView.layoutManager?.let {
+                    if (it is LinearLayoutManager) {
+                        it.scrollToPositionWithOffset(position, 0)
+                    }
+                }
+            },delayed)
+
         }
 
         /**
@@ -36,7 +49,7 @@ class RvHelper {
                 it.changeDuration = 0
                 it.moveDuration = 0
                 it.removeDuration = 0
-                if(it is SimpleItemAnimator) {
+                if (it is SimpleItemAnimator) {
                     it.supportsChangeAnimations = false
                 }
             }

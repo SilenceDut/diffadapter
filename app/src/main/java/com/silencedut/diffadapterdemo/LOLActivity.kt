@@ -15,6 +15,7 @@ import com.silencedut.core.provider.legend.ILegendDateProvider
 import com.silencedut.diffadapter.DiffAdapter
 import com.silencedut.diffadapter.data.BaseMutableData
 import com.silencedut.diffadapter.rvhelper.RvHelper
+import com.silencedut.diffadapter.rvhelper.RvHelper.Companion
 import com.silencedut.diffadapter.utils.DiffModelProvider
 import com.silencedut.diffadapterdemo.adapter.LegendHolder
 import com.silencedut.diffadapterdemo.adapter.LegendViewData
@@ -197,7 +198,7 @@ class LOLActivity : AppCompatActivity(){
                                     return
                                 }
                                 mRVTest?.let {
-                                    RvHelper.scrollToBottom(it,(0 until diffAdapter.itemCount).random())
+                                    RvHelper.scrollTo(it, (0 until diffAdapter.itemCount).random())
                                 }
 
                                 val time = (300 until 500L).random()
