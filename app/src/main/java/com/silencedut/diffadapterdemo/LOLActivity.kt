@@ -79,11 +79,9 @@ class LOLActivity : AppCompatActivity(){
 
         }
 
-        findViewById<View>(R.id.random_add).setOnClickListener { _ ->
+        findViewById<View>(R.id.random_add).setOnClickListener {
             val oneLegend = Transfer.getImpl(ILegendDateProvider::class.java).fetchOneLegends()
             diffAdapter.addData(legendViewModel.convertToAdapterData(oneLegend))
-            diffAdapter.datas.add(0,diffAdapter.datas[(0 until diffAdapter.itemCount-1).random()])
-            diffAdapter.datas = diffAdapter.datas
         }
 
         findViewById<View>(R.id.random_insert).setOnClickListener { _ ->

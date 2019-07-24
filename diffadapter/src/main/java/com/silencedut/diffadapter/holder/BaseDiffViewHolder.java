@@ -30,15 +30,10 @@ import java.util.Set;
 
 public abstract class BaseDiffViewHolder<T extends BaseMutableData> extends RecyclerView.ViewHolder implements IProvideItemId {
 
-    protected DiffAdapter mBaseAdapter;
+    private DiffAdapter mBaseAdapter;
     private Context mContext;
     private LayoutInflater mLayoutInflater;
     private T mData;
-
-    private void setUIContext(Context context) {
-        this.mContext = context;
-        this.mLayoutInflater = LayoutInflater.from(context);
-    }
 
     protected LayoutInflater getLayoutInflater() {
         return mLayoutInflater;
@@ -48,11 +43,16 @@ public abstract class BaseDiffViewHolder<T extends BaseMutableData> extends Recy
         return mContext;
     }
 
+    protected DiffAdapter getAdapter() {
+        return mBaseAdapter;
+    }
+
 
     public BaseDiffViewHolder(View itemView, DiffAdapter baseRecyclerAdapter) {
         super(itemView);
-        mBaseAdapter = baseRecyclerAdapter;
-        setUIContext(mBaseAdapter.mContext);
+        this.mBaseAdapter = baseRecyclerAdapter;
+        this.mContext = baseRecyclerAdapter.mContext;
+        this.mLayoutInflater = LayoutInflater.from(this.mContext);
     }
 
     public final void update(@NonNull T data, int position) {
@@ -67,14 +67,6 @@ public abstract class BaseDiffViewHolder<T extends BaseMutableData> extends Recy
      */
     public abstract void updateItem(@NonNull T data, int position);
 
-    /**
-     * no use anymore ,interface just Compatible with older versions
-     *  use  {@link #updatePartWithPayload(BaseMutableData, Set, int)}
-     */
-    @Deprecated
-    public void updatePartWithPayload(T data, @NonNull Bundle payload, int position) {
-
-    }
 
 
     /**

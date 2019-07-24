@@ -2,7 +2,6 @@ package com.silencedut.diffadapterdemo
 
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
-import android.os.Bundle
 import android.util.Log
 import com.silencedut.core.Transfer
 import com.silencedut.core.provider.legend.ILegendDateProvider
@@ -11,7 +10,6 @@ import com.silencedut.core.provider.legend.pojo.*
 import com.silencedut.diffadapter.DiffAdapter
 import com.silencedut.diffadapter.data.BaseMutableData
 import com.silencedut.diffadapter.utils.UpdatePayloadFunction
-import com.silencedut.diffadapter.utils.UpdateFunction
 import com.silencedut.diffadapterdemo.adapter.LegendViewData
 import com.silencedut.diffadapterdemo.adapter.SkinViewData
 
@@ -117,17 +115,18 @@ class LegendViewModel : ViewModel(), LegendNotification.LegendInfo, LegendNotifi
         })
 
         //如果变化的数据只需要特定类型的Holder刷新，类型即可指定
-        diffAdapter.addUpdateMediator(legendSkinData, object : UpdateFunction<LegendSkin, SkinViewData> {
+        diffAdapter.addUpdateMediator(legendSkinData, object : UpdatePayloadFunction<LegendSkin, SkinViewData> {
             override fun providerMatchFeature(input: LegendSkin): Any {
                 return input.id
             }
 
-            override fun applyChange(input: LegendSkin, originalData: SkinViewData): SkinViewData {
-                Log.d(TAG, "applyChange legendSkinData $input")
-                //可以在原对象上修改
+            override fun applyChange(
+                input: LegendSkin, originalData: SkinViewData, payloadKeys: MutableSet<String>
+            ): SkinViewData {
                 originalData.legendSkin = input
                 return originalData
             }
+
         })
     }
 
