@@ -11,21 +11,11 @@ import android.support.v7.widget.SimpleItemAnimator
 class RvHelper {
     companion object {
 
-
         /**
          * 最后一个Item是否可见
          */
         fun isAlignToBottom(recyclerView: RecyclerView): Boolean {
             return recyclerView.computeVerticalScrollExtent() + recyclerView.computeVerticalScrollOffset() >= recyclerView.computeVerticalScrollRange()
-        }
-
-        @Deprecated("no use anymore",ReplaceWith("RvHelper.scrollTo(recyclerView,position)" ))
-        fun scrollToBottom(recyclerView: RecyclerView?, position: Int) {
-            recyclerView?.layoutManager?.let {
-                if (it is LinearLayoutManager) {
-                    it.scrollToPositionWithOffset(position, 0)
-                }
-            }
         }
 
         fun scrollTo(recyclerView: RecyclerView?, position: Int, delayed: Long = 0) {
