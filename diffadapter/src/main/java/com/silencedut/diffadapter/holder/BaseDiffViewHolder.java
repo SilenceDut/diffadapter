@@ -75,7 +75,7 @@ public abstract class BaseDiffViewHolder<T extends BaseMutableData> extends Recy
      * @param position
      */
     public void updatePartWithPayload(T newData, @NonNull Set<String> payloadKeys, int position){
-
+        this.mData = newData;
     }
 
     protected final T getData() {
