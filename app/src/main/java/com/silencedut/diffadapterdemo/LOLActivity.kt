@@ -49,9 +49,7 @@ class LOLActivity : AppCompatActivity(){
         diffAdapter.registerHolder(SkinHolder::class.java, SkinViewData.VIEW_ID)
         diffAdapter.registerHolder(LegendHolder::class.java, LegendViewData.VIEW_ID)
 
-
-        val linearLayoutManager = LinearLayoutManagerWrapper(this)
-        mRVTest!!.layoutManager = linearLayoutManager
+        mRVTest!!.layoutManager = LinearLayoutManagerWrapper(this)
         mRVTest!!.adapter = diffAdapter
 
         //监听变化，自动刷新
